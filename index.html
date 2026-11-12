@@ -81,12 +81,12 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .dots i{width:calc(var(--u)*4);height:calc(var(--u)*4);border-radius:50%;background:var(--paper-2);border:var(--u) solid var(--ink)}
 .dots i.on{background:var(--pink)}
 .cat{color:var(--muted)}
- #pauseBtn{position:absolute;z-index:1;top:max(52px,calc(var(--u)*25));right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
+ #pauseBtn{position:absolute;z-index:1;top:calc(var(--edge) + max(36px,calc(var(--u)*17)) + max(10px,calc(var(--u)*5)));right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
   border:var(--u) solid var(--ink);border-radius:50%;background:rgba(242,226,214,.92);box-shadow:0 var(--u) 0 var(--ink);display:grid;grid-auto-flow:column;place-content:center;gap:22%;cursor:pointer;touch-action:manipulation;padding:0}
 #pauseBtn i{display:block;width:max(5px,calc(var(--u)*2.5));height:max(16px,calc(var(--u)*8));background:var(--ink);border-radius:2px}
 #pauseBtn:active{transform:translateY(var(--u));box-shadow:none}
 #pauseBtn:focus-visible{outline:var(--u) dashed var(--pink);outline-offset:var(--u)}
-.tools{position:absolute;left:max(calc(var(--u)*4),env(safe-area-inset-left,0px));bottom:max(calc(var(--u)*4),env(safe-area-inset-bottom,0px));display:flex;gap:calc(var(--u)*2);z-index:1}
+.tools{position:absolute;left:max(calc(var(--u)*4),env(safe-area-inset-left,0px));bottom:var(--edge);display:flex;gap:calc(var(--u)*2);z-index:1}
 .tools .btn{padding:var(--u) calc(var(--u)*4)}
 .works{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--u)*52),1fr));gap:calc(var(--u)*3)}
 .works figure{margin:0;display:grid;gap:var(--u);justify-items:center;text-align:center;border:var(--u) solid var(--ink);border-radius:calc(var(--u)*3);padding:calc(var(--u)*2);background:var(--paper-2)}
@@ -185,7 +185,8 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
   background:repeating-linear-gradient(90deg,rgba(255,236,200,.09) 0 1px,transparent 1px 7px),repeating-linear-gradient(0deg,rgba(255,236,200,.09) 0 1px,transparent 1px 7px)}
 .btn:disabled::after{opacity:.5}
 .row{gap:max(16px,calc(var(--u)*8))!important}.tools{gap:max(14px,calc(var(--u)*7))!important}.tabs{gap:max(10px,calc(var(--u)*5))!important}.seg{gap:max(10px,calc(var(--u)*5))!important}
-.hud{top:max(6px,calc(var(--u)*4))}
+.hud{top:var(--edge)}
+#stage{--edge:max(calc(var(--u)*4),env(safe-area-inset-bottom,0px))}
 .hud .grp{padding:0 max(14px,calc(var(--u)*7))!important;gap:max(12px,calc(var(--u)*6))!important;min-height:max(36px,calc(var(--u)*17))!important;font-size:max(13px,var(--fs))}
 .row{gap:max(12px,calc(var(--u)*6))}.tools{gap:max(10px,calc(var(--u)*5))}.tabs{gap:max(8px,calc(var(--u)*4))}
 
@@ -657,7 +658,7 @@ function drawShop(pn){
   for(const [gx,gy,r] of [[92,82,90],[160,8,46]]){for(let k=r;k>0;k-=6){x.fillStyle='rgba(255,176,130,.05)';x.beginPath();x.arc(gx,gy,k,0,7);x.fill()}}
   if(deco){pill('가구를 끌어서 원하는 자리에 놓아요',160,20,C.gold);for(const id in DECOR){if(!decoOwned(id))continue;const d=DECOR[id],p=placeOf(id),on=drag&&drag.id===id;
       x.fillStyle=on?C.gold:C.cream;for(let i=0;i<d.w;i+=4){x.fillRect(p.x+i,p.y-1,2,1);x.fillRect(p.x+i,p.y+d.h,2,1)}for(let j=0;j<d.h;j+=4){x.fillRect(p.x-1,p.y+j,1,2);x.fillRect(p.x+d.w,p.y+j,1,2)}}}
-  else if(fc&&fc.state==='wait'&&scene==='shop'&&!anyPanel())softLabel(fc.name?`${fc.name}을 눌러 주문 받기`.replace('니을','니를').replace('지을','지를').replace('피을','피를').replace('루을','루를'):'손님을 눌러 주문 받기',160,24);
+  else if(fc&&fc.state==='wait'&&scene==='shop'&&!anyPanel())softLabel(fc.name?`${fc.name}을 눌러 주문 받기`.replace('니을','니를').replace('지을','지를').replace('피을','피를').replace('루을','루를'):'손님을 눌러 주문 받기',160,hudBottomY()+7);
   drawToast(pn);
 }
 const iconCache=new Map();
@@ -1176,17 +1177,19 @@ const TOUCH=matchMedia('(pointer:coarse)').matches;
 const PAD=()=>{const w=68,x1=W+OX-14;return{x:x1-w,y:62,w,h:68}};
 const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
 function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q.y<=p.y+p.h+6}
-function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2-2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
-  /* a round leather thumb rest: soft disc, brass dotted rim, little chevrons; no box, no label */
-  for(let yy=-R-1;yy<=R+1;yy++)for(let xx=-R-1;xx<=R+1;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R+.5)continue;
-    if(d>R-1.5){x.fillStyle=((Math.round(Math.atan2(yy,xx)*R/2))%2)?'rgba(255,203,92,.55)':'rgba(42,26,32,.35)'}else if(d>R-5)x.fillStyle='rgba(42,26,32,.22)';else x.fillStyle='rgba(42,26,32,.12)';x.fillRect(cx+xx,cy+yy,1,1)}
-  const cv='rgba(246,216,144,.75)',chev=(ax,ay,dx,dy)=>{x.fillStyle=cv;for(let k=-2;k<=2;k++){const o=Math.abs(k);x.fillRect(ax+dy*k-dx*o,ay+dx*k-dy*o,1,1);x.fillRect(ax+dy*k-dx*o+dx,ay+dx*k-dy*o+dy,1,1)}};
-  const e=R-8;chev(cx,cy-e,0,-1);chev(cx,cy+e,0,1);
-  if(taps){x.fillStyle='rgba(246,216,144,.4)';for(let yy=-R+6;yy<R-5;yy+=3)x.fillRect(cx,cy+yy,1,2);chev(cx-e,cy,-1,0);chev(cx+e,cy,1,0)}
-  else{chev(cx-e,cy,-1,0);chev(cx+e,cy,1,0)}
-  x.fillStyle='rgba(246,216,144,.5)';x.fillRect(cx-1,cy-1,2,2);
-  const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);
-    if(padTouch.dx||padTouch.dy){x.fillStyle=C.gold;for(let i=1;i<8;i++)x.fillRect(Math.round(padTouch.x+padTouch.dx*i*2),Math.round(padTouch.y+padTouch.dy*i*2),1,1)}x.globalAlpha=1}}
+function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
+  for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R)continue;x.fillStyle=d>R-3?'rgba(30,14,20,.12)':'rgba(30,14,20,.2)';x.fillRect(cx+xx,cy+yy,1,1)}
+  const now=performance.now(),lit=st.press&&now-st.press.t<140?st.press.dir:null;
+  const key=(kx,ky,g,on)=>{const S=13,l=kx-6,t=ky-6;
+    x.fillStyle='rgba(30,14,20,.45)';x.fillRect(l+1,t+S,S-2,1);
+    x.fillStyle=C.ink;x.fillRect(l+1,t,S-2,S);x.fillRect(l,t+1,S,S-2);
+    x.fillStyle=on?'#c98a4a':'#6b3f2c';x.fillRect(l+1,t+1,S-2,S-2);
+    x.fillStyle=on?'#f0c070':'#8a5638';x.fillRect(l+2,t+1,S-4,1);x.fillStyle='#4a2a1c';x.fillRect(l+2,t+S-2,S-4,1);
+    x.fillStyle='#e0b050';x.fillRect(l+1,t+1,1,1);x.fillRect(l+S-2,t+1,1,1);x.fillRect(l+1,t+S-2,1,1);x.fillRect(l+S-2,t+S-2,1,1);
+    x.fillStyle=on?'#fff4dc':'#f6d890';GLY[g].forEach((r,yy)=>[...r].forEach((ch,xx)=>{if(ch==='x')x.fillRect(l+4+xx,t+4+yy,1,1)}))};
+  const e=R-9;key(cx,cy-e,'U',lit==='U');key(cx,cy+e,'D',lit==='D');
+  if(taps){key(cx-e,cy,'TL',lit==='TL');key(cx+e,cy,'TR',lit==='TR')}else{key(cx-e,cy,'L',lit==='L');key(cx+e,cy,'R',lit==='R')}
+  const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);x.globalAlpha=1}}
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
 const ptr={};
@@ -1276,8 +1279,9 @@ const REG=Object.fromEntries(REGS.map(r=>[r.id,r]));
 function toast(text){(shop.toastQ=shop.toastQ||[]).push(text)}
 function drawToast(pn){if(scene!=='shop'||anyPanel())return;
   if(!shop.toastCur||pn-shop.toastCur.t>2600){const n=(shop.toastQ||[]).shift();shop.toastCur=n?{text:n,t:pn}:null}
-  if(shop.toastCur){const k=(pn-shop.toastCur.t)/2600;softLabel(shop.toastCur.text,160,48,k<.08?k/.08:k>.88?(1-k)/.12:1)}}
+  if(shop.toastCur){const k=(pn-shop.toastCur.t)/2600;softLabel(shop.toastCur.text,160,hudBottomY()+27,k<.08?k/.08:k>.88?(1-k)/.12:1)}}
 /* a notice with no box: cream text over a soft dark blur, like a shadow behind it */
+function hudBottomY(){const h=$('hud');if(h.hidden)return 20;const r=h.getBoundingClientRect(),c=cv.getBoundingClientRect();return (r.bottom-c.top)/c.height*VH-OY}
 function softLabel(text,cx,y,alpha=1){const x=ctx;x.save();x.font='12px Galmuri11';const w=Math.ceil(x.measureText(text).width),h=14,l=Math.round(Math.max(8-OX,Math.min(W+OX-8-w,cx-w/2)));
   x.globalAlpha=alpha;x.fillStyle='#000';x.shadowColor='rgba(16,6,10,.14)';x.shadowBlur=7;x.shadowOffsetX=2000;
   x.fillRect(l-4-2000,y-1,w+8,h+2)
@@ -1569,7 +1573,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af52a7e';
+const BUILD='6af52bb7';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
