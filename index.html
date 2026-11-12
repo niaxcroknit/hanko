@@ -1206,7 +1206,7 @@ function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=
     for(let i=-1;i>-1-1;i--)for(let j=-1;j<=1;j++)at(1,j,C.ink);
     for(let i=0;i<L-1;i++){const hw=half(i);for(let j=-hw;j<=hw;j++)at(-i,j,i===0||Math.abs(j)===hw?hi:i===L-2?lo:fill)}
     at(-L+2,0,on?'#fff4dc':'#e0b050')};
-  const e=R-6,tx=Math.round;
+  const e=Math.min(R-6,31),tx=Math.round;
   tri(cx,cy-e,0,-1,lit==='U');tri(cx,cy+e,0,1,lit==='D');
   tri(cx-e,cy,-1,0,lit==='L'||lit==='TL');tri(cx+e,cy,1,0,lit==='R'||lit==='TR');
   if(taps){x.fillStyle='rgba(246,216,144,.35)';for(let yy=-R+14;yy<R-13;yy+=3)x.fillRect(cx,cy+yy,1,2)}
@@ -1625,7 +1625,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`í
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af5451c';
+const BUILD='6af5461e';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
