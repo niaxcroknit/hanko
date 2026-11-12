@@ -873,17 +873,17 @@ function drawKnit(t){
   x.fillStyle=beatHot?C.gold:C.goldD;for(let y=KY+KNR*2+4;y<LANE-12;y+=3)x.fillRect(J-1,y,2,2);
 
   /* lane */
-  const speed=(owned('metro')?19:15)*4/BT,LT=LANE-12,LH=24;
-  if(st.fever){const k=Math.floor(pn/90)%4;rrect(x,2-OX,LT-2,316+2*OX,LH+4,C.gold);for(let i=0;i<10;i++){const sx=(i*37+k*9+Math.floor(pn/40))%(316+2*OX)-OX;x.fillStyle=i%2?'#fff3b0':C.rose;x.fillRect(sx,LT-4-(i%3)*2,2,2)}}
-  rrect(x,4-OX,LT,312+2*OX,LH,st.fever?'#fff0cc':'#f2e2d6');x.fillStyle='#e2ccbc';x.fillRect(6-OX,LT+LH-4,308+2*OX,2);
+  const speed=(owned('metro')?19:15)*4/BT,LT=LANE-12,LH=24,LR=TOUCH&&st.phase!=='idle'?PAD().x-6:W+OX-4;
+  if(st.fever){const k=Math.floor(pn/90)%4;rrect(x,2-OX,LT-2,LR+2-(2-OX),LH+4,C.gold);for(let i=0;i<10;i++){const sx=(i*37+k*9+Math.floor(pn/40))%(LR-(2-OX))-OX;x.fillStyle=i%2?'#fff3b0':C.rose;x.fillRect(sx,LT-4-(i%3)*2,2,2)}}
+  rrect(x,4-OX,LT,LR-(4-OX),LH,st.fever?'#fff0cc':'#f2e2d6');x.fillStyle='#e2ccbc';x.fillRect(6-OX,LT+LH-4,LR-(6-OX)-2,2);
   if(st.phase!=='idle'){const b0=Math.floor((t-st.start)/BT)-1;
-    for(let b=b0;b<b0+Math.ceil((J+OX)/(speed*BT))+3;b++){const bx=Math.round(J-(bt(b)-t)*speed);if(bx<6-OX||bx>314+OX)continue;const bar=ROW.some(R=>R.start===b);
+    for(let b=b0;b<b0+Math.ceil((J+OX)/(speed*BT))+3;b++){const bx=Math.round(J-(bt(b)-t)*speed);if(bx<6-OX||bx>LR-6)continue;const bar=ROW.some(R=>R.start===b);
       if(bar){x.fillStyle='#f0b98a';x.fillRect(bx,LT+2,2,LH-4);heartPx(x,bx-1,LT-4,'#f0a090')}else{x.fillStyle='#ddc6b6';x.fillRect(bx,LT+3,1,LH-6)}}}
   const lane=[...st.notes];if(st.row+1<ROWS&&st.phase==='play')lane.push(...prevRow(st.row+1).notes);
   /* judge circle */
   x.fillStyle=beatHot?'#ffe2a0':'#f8ead8';for(let y=-9;y<=9;y++)for(let i=-9;i<=9;i++)if(i*i+y*y<=81){x.fillRect(J+i,LANE+y,1,1)}
   ring(x,J,LANE,10,beatHot?C.goldD:C.pink,2);
-  for(const n of lane){if(n.res&&n.res!=='miss')continue;const nx=Math.round(J-(n.t-t)*speed);if(nx<-8-OX||nx>318+OX)continue;
+  for(const n of lane){if(n.res&&n.res!=='miss')continue;const nx=Math.round(J-(n.t-t)*speed);if(nx<-8-OX||nx>LR-8)continue;
     const wy=n.wobble?Math.round(Math.sin(pn/90+nx/9)*3):0;
     if(n.golden&&!n.res){x.fillStyle=Math.floor(pn/120)%2?C.gold:'#fff3b0';for(const [dx,dy] of [[-9,0],[9,0],[0,-9],[0,9]])x.fillRect(nx+dx-1,LANE+wy+dy-1,2,2);ring(x,nx,LANE+wy,8,C.gold,1)}
     x.globalAlpha=n.res==='miss'?.3:1;x.drawImage(noteSprite(n),nx-7,LANE-7+wy);x.globalAlpha=1;
@@ -897,7 +897,7 @@ function drawKnit(t){
 
   /* combo inside the empty right end of the lane, pops just above it */
   const s=st.stats;
-  if(st.phase==='play'&&s.combo>=4){const k=Math.min(1,(pn-st.comboT)/120);txt(`${s.combo} 콤보`,262,LANE-6-(k<1?1:0),st.level>=1?C.goldD:C.ink,'center',12,true,'#e2ccbc')}
+  if(st.phase==='play'&&s.combo>=4){const k=Math.min(1,(pn-st.comboT)/120);txt(`${s.combo} 콤보`,Math.min(262,LR-34),LANE-6-(k<1?1:0),st.level>=1?C.goldD:C.ink,'center',12,true,'#e2ccbc')}
   st.pops=st.pops.filter(p=>pn-p.t<800);st.pops.forEach((p,i)=>{const k=(pn-p.t)/800;txt(p.text,250,LT-16-i*13-Math.round(k*5),p.color,'center',12,true,C.ink)});
   if(st.phase==='play'&&order){const bk=bestKey(),best=(save.best||{})[bk];if(best&&best.score){const f=Math.max(0,Math.min(1,(t-bt(LEAD))/((TOTAL-LEAD)*BT))),diff=Math.round(st.score-best.score*f);
       const txt2=`최고 기록보다 ${diff>=0?'+':''}${diff.toLocaleString()}`;pill(txt2,252,20,diff>=0?'#d6f2df':'#f6d2d2',C.ink,130)}
@@ -1171,7 +1171,7 @@ function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;fitW=w;fit
 addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 /* thumb pad on the right: the swipe can start anywhere, but this gives the thumb a home that is not the judge circle */
 const TOUCH=matchMedia('(pointer:coarse)').matches;
-const PAD=()=>{const w=80,x1=W+OX-10;return{x:x1-w,y:52,w,h:80}};
+const PAD=()=>{const w=80,x1=W+OX-10;return{x:x1-w,y:H-w-4,w,h:80}};
 const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
 function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q.y<=p.y+p.h+6}
 function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
@@ -1585,7 +1585,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af52d8e';
+const BUILD='6af5309b';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
