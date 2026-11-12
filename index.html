@@ -1045,7 +1045,7 @@ $('titleHelp').addEventListener('click',()=>openHelp('titleP'));$('pauseHelp').a
 
 /* title */
 function refreshTitle(){const has=save.day>1||save.coins>0;$('playBtn').textContent=has?'이어서 영업':'영업 시작';$('newBtn').hidden=!has;
-  $('saveNote').textContent=has?`${save.day}일차 · ${save.coins}코인 · 이 브라우저에 저장돼요`:'진행은 이 브라우저에 저장돼요.'}
+  $('saveNote').textContent=has?`${save.day}일차 · ${save.coins}코인 · 이 브라우저에 저장돼요`:'진행은 이 브라우저에 저장돼요.';$('saveNote').textContent+=` · 버전 ${BUILD.slice(-4)}`}
 document.querySelectorAll('#speeds button').forEach(b=>b.addEventListener('click',()=>{BPM=+b.dataset.bpm;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
 const fsOK=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
 const isFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
@@ -1450,6 +1450,10 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
   const d=!owned('yard'),s=!owned('studio');if($('tDye').hidden!==d)$('tDye').hidden=d;if($('tStudio').hidden!==s)$('tStudio').hidden=s}
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
+/* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
+const BUILD='6af51e46';
+if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
+  if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
 (document.fonts&&document.fonts.load?document.fonts.load('12px Galmuri11'):Promise.resolve()).finally(()=>requestAnimationFrame(frame));
 })();
