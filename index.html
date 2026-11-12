@@ -1,3 +1,13 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#2b1d22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="한코 뜨개방">
 <title>한코 뜨개방</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -118,7 +128,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
     <canvas id="cv" width="320" height="180" aria-label="한코 뜨개방 게임 화면"></canvas>
     <div class="hud" id="hud" hidden>
       <div class="grp"><span id="hudL"></span></div>
-      <div class="grp"><span id="hudR"></span><button class="pbtn" id="helpBtn" type="button" aria-label="게임 방법" hidden>?</button><button class="pbtn" id="pauseBtn" type="button" aria-label="멈추기" hidden>II</button></div>
+      <div class="grp"><span id="hudR"></span><button class="pbtn" id="fsBtn" type="button" aria-label="전체 화면" hidden>⛶</button><button class="pbtn" id="helpBtn" type="button" aria-label="게임 방법" hidden>?</button><button class="pbtn" id="pauseBtn" type="button" aria-label="멈추기" hidden>II</button></div>
     </div>
     <div class="legend" id="legend" hidden></div>
     <div class="tools" id="tools" hidden><button class="btn" id="tStore" type="button">상점</button><button class="btn" id="tBag" type="button">가방</button><button class="btn" id="tDeco" type="button">꾸미기</button><button class="btn" id="tGoal" type="button">목표</button><button class="btn" id="tMail" type="button">편지</button><button class="btn" id="tDye" type="button" hidden>염색</button><button class="btn" id="tStudio" type="button" hidden>작업실</button></div>
@@ -1031,7 +1041,15 @@ $('titleHelp').addEventListener('click',()=>openHelp('titleP'));$('pauseHelp').a
 function refreshTitle(){const has=save.day>1||save.coins>0;$('playBtn').textContent=has?'이어서 영업':'영업 시작';$('newBtn').hidden=!has;
   $('saveNote').textContent=has?`${save.day}일차 · ${save.coins}코인 · 이 브라우저에 저장돼요`:'진행은 이 브라우저에 저장돼요.'}
 document.querySelectorAll('#speeds button').forEach(b=>b.addEventListener('click',()=>{BPM=+b.dataset.bpm;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
-$('playBtn').addEventListener('click',()=>{initAudio();$('titleP').hidden=true;startDay()});
+const fsOK=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const isFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function goFS(){if(!fsOK()||isFS())return;const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
+  try{const pr=rq.call(el,{navigationUI:'hide'});const lock=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};if(pr&&pr.then)pr.then(lock,()=>{});else lock()}catch(e){}}
+function syncFS(){const b=$('fsBtn');b.hidden=!fsOK();b.textContent=isFS()?'⤢':'⛶';b.setAttribute('aria-label',isFS()?'전체 화면 끄기':'전체 화면');setTimeout(fit,120)}
+$('fsBtn').addEventListener('click',()=>{if(isFS())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else goFS()});
+document.addEventListener('fullscreenchange',syncFS);document.addEventListener('webkitfullscreenchange',syncFS);syncFS();
+addEventListener('orientationchange',()=>setTimeout(fit,250));
+$('playBtn').addEventListener('click',()=>{if(matchMedia('(pointer:coarse)').matches)goFS();initAudio();$('titleP').hidden=true;startDay()});
 $('newBtn').addEventListener('click',()=>{save=fresh();persist();refreshTitle()});
 document.querySelectorAll('#oSeg button').forEach(b=>b.addEventListener('click',()=>{if(!order)return;order.hard=b.dataset.h==='1';document.querySelectorAll('#oSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
   $('oPay').textContent=`최대 ${Math.round(payFor(order.pk,1)*(order.hard?1.5:1)*extraPayMul()).toLocaleString()}코인 + 팁`}));
@@ -1051,7 +1069,7 @@ function focusStage(){try{if(document.activeElement&&document.activeElement.blur
    8. Input, scaling, loop
    ========================================================= */
 const stageEl=$('stage');let SCALE_PX=2;
-function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;let s=Math.floor(Math.min(w/W,h/H));if(s<1)s=Math.min(w/W,h/H);SCALE_PX=s;
+function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;const f=Math.min(w/W,h/H);let s=Math.floor(f);if(s<1||s/f<.9)s=f;SCALE_PX=s;
   stageEl.style.setProperty('--u',s+'px');stageEl.style.setProperty('--fs',Math.max(10,Math.round(6*s))+'px')}
 addEventListener('resize',fit);
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
@@ -1425,3 +1443,5 @@ refreshTitle();fit();
 (document.fonts&&document.fonts.load?document.fonts.load('12px Galmuri11'):Promise.resolve()).finally(()=>requestAnimationFrame(frame));
 })();
 </script>
+
+</html>
