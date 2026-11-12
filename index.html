@@ -81,7 +81,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .dots i{width:calc(var(--u)*4);height:calc(var(--u)*4);border-radius:50%;background:var(--paper-2);border:var(--u) solid var(--ink)}
 .dots i.on{background:var(--pink)}
 .cat{color:var(--muted)}
- #pauseBtn{position:absolute;z-index:1;top:calc(var(--u)*18);right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
+ #pauseBtn{position:absolute;z-index:1;top:calc(var(--u)*23);right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
   border:var(--u) solid var(--ink);border-radius:50%;background:rgba(242,226,214,.92);box-shadow:0 var(--u) 0 var(--ink);display:grid;grid-auto-flow:column;place-content:center;gap:22%;cursor:pointer;touch-action:manipulation;padding:0}
 #pauseBtn i{display:block;width:max(5px,calc(var(--u)*2.5));height:max(16px,calc(var(--u)*8));background:var(--ink);border-radius:2px}
 #pauseBtn:active{transform:translateY(var(--u));box-shadow:none}
@@ -177,6 +177,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
         <p class="sub" id="pauseNote" hidden></p>
         <button class="btn main" id="resumeBtn" type="button">계속 뜨기</button>
         <button class="btn" id="restartBtn" type="button">이 주문 처음부터</button>
+        <button class="btn" id="quitBtn" type="button">그만 뜨고 가게로 나가기</button>
         <button class="btn" id="pauseHelp" type="button">게임 방법</button>
       </div>
     </div>
@@ -689,10 +690,17 @@ function judge(n,res){n.res=res;const s=st.stats;
   if(!st.fever&&s.combo>=20){st.fever=true;st.feverCount++;st.feverT=performance.now();pop('피버 타임! 점수 2배',C.rose);if(st.ac)[0,3,7,10,12,15,19,24].forEach((x,i)=>tone(st.ac.currentTime+i*.035,hz(72+x),'square',.035,.1,.002))}
   st.jabT=performance.now();playHit(n,res);st.flashes.push({t:performance.now(),col:MOVE[n.kind].col});
   if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}}
-function input(dir,stamp,key){
+const ANG={R:0,UR:-45,U:-90,L:180,D:90,DL:135};
+const angDiff=(a,b)=>{let d=Math.abs(a-b)%360;return d>180?360-d:d};
+function input(dir,stamp,key,vec){
   if(scene!=='knit'||st.phase!=='play')return;
   let lag=key?0:(performance.now()-stamp)/1000;if(!(lag>=0&&lag<.15))lag=0;
-  const t=pnow()-lag;st.press={dir,t:performance.now()};
+  const t=pnow()-lag;
+  /* a thumb swipe is rarely straight: snap it to the closest direction among the notes that are due right now (within 70 degrees) */
+  if(vec&&dir!=='TL'&&dir!=='TR'){const a=Math.atan2(vec.dy,vec.dx)*180/Math.PI;let best=null,bd=71;
+    for(const n of st.notes){if(n.res||n.dir==='TL'||n.dir==='TR')continue;const op=n.pi===1?n.s.parts[0].t-GOOD*1.3:n.t-GOOD*1.3;if(t<op||t>n.t+GOOD)continue;
+      const cand=n.dir==='ANY'?(vec.dy<0?'U':'D'):n.dir,d=angDiff(a,ANG[cand]);if(d<bd){bd=d;best=cand}}
+    if(best)dir=best}st.press={dir,t:performance.now()};
   /* oldest waiting note of this direction first, so two quick presses land on two notes in order */
   /* a second tap may come right after the first one; otherwise a note is open from GOOD before to GOOD after its time */
   const opens=n=>n.pi===1?n.s.parts[0].t-GOOD:n.t-GOOD;
@@ -703,7 +711,7 @@ function input(dir,stamp,key){
   if(match&&match.dir==='ANY'){match.s.a=dir==='D'?'P':'K';match.kind=match.s.a}
   if(match&&match.tangle&&md>PERF*1.6){judge(match,'miss');pop('엉킨 실은 정확하게!',C.amber)}
   else if(match)judge(match,md<=PERF?'perfect':'good');
-  else if(other){pop(other.dir==='TL'||other.dir==='TR'?'탭 순서!':'방향!',C.red);if(st.ac)tone(st.ac.currentTime,hz(50),'square',.03,.06,.002);st.jabT=performance.now()-70}
+  else if(other&&!st.notes.some(n=>!n.res&&(n.dir===dir||n.dir==='ANY')&&Math.abs(n.t-t)<GOOD*2.5)){pop(other.dir==='TL'||other.dir==='TR'?(other.pi===1?'따닥 순서!':'탭!'):`${{U:'↑',D:'↓',L:'←',R:'→',UR:'↗',DL:'↙',ANY:'↑↓'}[other.dir]} 방향이에요`,C.red);if(st.ac)tone(st.ac.currentTime,hz(50),'square',.03,.06,.002);st.jabT=performance.now()-70}
   else{let nd=9;for(const n of st.notes){if(n.res||n.dir!==dir)continue;const d=n.t-t;if(Math.abs(d)<Math.abs(nd))nd=d}
     if(Math.abs(nd)<.45)pop(nd>0?'빨라요':'늦어요',C.amber);if(st.ac)tone(st.ac.currentTime,hz(96),'square',.015,.03,.002);st.jabT=performance.now()-70}}
 function rowColor(r){if(!order)return undefined;if(P.stripe)return Math.floor(r/2)%2?order.yarn2:undefined;if(order.grad)return mixHex(YARN,order.yarn2,r/(ROWS-1));return undefined}
@@ -1067,6 +1075,9 @@ function pause(why){if(scene!=='knit'||st.phase!=='play')return;st.phase='paused
 $('pauseBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pause()});$('pauseBtn').addEventListener('click',()=>pause());
 $('resumeBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();st.phase='play';focusStage()});
 $('restartBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();beginKnit()});
+/* leave the knitting without penalty: the customer keeps waiting at the counter and can be served again */
+$('quitBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.phase='idle';st.notes=[];st.sts=[];if(st.master){const g=st.master.gain,t=st.ac.currentTime;g.setValueAtTime(0,t);g.setValueAtTime(.7,t+.3)}st.ac.resume();
+  $('legend').hidden=true;scene='shop';if(order&&order.c&&order.c.state!=='leave')order.c.state='wait';order=null;toast('뜨개를 멈추고 가게로 나왔어요. 손님은 기다려줘요');focusStage()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 addEventListener('blur',()=>pause('blur'));
 function focusStage(){try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();$('stage').focus({preventScroll:true})}catch(e){}}
@@ -1083,15 +1094,27 @@ function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;fitW=w;fit
   const f=Math.min(w/VW,h/VH);let s=f;SCALE_PX=s;
   stageEl.style.setProperty('--u',s+'px');stageEl.style.setProperty('--fs',Math.max(10,Math.round(6*s))+'px')}
 addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);
+/* thumb pad on the right: the swipe can start anywhere, but this gives the thumb a home that is not the judge circle */
+const TOUCH=matchMedia('(pointer:coarse)').matches;
+const PAD=()=>{const w=Math.min(96,58+OX),x1=W+OX-6;return{x:x1-w,y:54,w,h:74}};
+const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
+function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q.y<=p.y+p.h+6}
+function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=p.x+p.w/2,cy=p.y+p.h/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
+  x.globalAlpha=.55;rrect(x,p.x,p.y,p.w,p.h,'#f2e2d6');x.globalAlpha=1;
+  const ac='rgba(42,26,32,.45)';txt('↑',cx,p.y+3,ac);txt('↓',cx,p.y+p.h-16,ac);if(!taps){txt('←',p.x+9,cy-7,ac);txt('→',p.x+p.w-9,cy-7,ac)}
+  if(taps){x.fillStyle='rgba(42,26,32,.18)';x.fillRect(Math.round(cx),p.y+6,1,p.h-12);txt('◀',p.x+12,cy-6,'rgba(42,26,32,.5)','center');txt('▶',p.x+p.w-12,cy-6,'rgba(42,26,32,.5)','center')}
+  else txt('엄지',cx,cy-7,'rgba(42,26,32,.55)','center');
+  const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),6+Math.round(k*6),C.gold,2);
+    if(padTouch.dx||padTouch.dy){x.fillStyle=C.gold;for(let i=0;i<10;i++)x.fillRect(Math.round(padTouch.x+padTouch.dx*i*1.6),Math.round(padTouch.y+padTouch.dy*i*1.6),2,2)}x.globalAlpha=1}}
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
 const ptr={};
-cv.addEventListener('pointerdown',e=>{ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};try{cv.setPointerCapture(e.pointerId)}catch(_){}
+cv.addEventListener('pointerdown',e=>{ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};if(scene==='knit'){const q=logical(e);Object.assign(padTouch,{x:q.x,y:q.y,t:performance.now(),dx:0,dy:0})}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(deco){const q=logical(e),id=decoHit(q);if(id){const p=placeOf(id);drag={id,ox:q.x-p.x,oy:q.y-p.y}}}});
 cv.addEventListener('pointermove',e=>{if(deco&&drag){const q=logical(e),d=DECOR[drag.id];save.place=save.place||{};save.place[drag.id]={x:Math.round(Math.max(0,Math.min(W-d.w,q.x-drag.ox))),y:Math.round(Math.max(d.y0,Math.min(d.y1,q.y-drag.oy)))};return}
-  const p=ptr[e.pointerId];if(!p||p.done||scene!=='knit')return;const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.hypot(dx,dy)>=14){p.done=true;input(classify(dx,dy),e.timeStamp)}});
+  const p=ptr[e.pointerId];if(!p||p.done||scene!=='knit')return;const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.hypot(dx,dy)>=14){p.done=true;const L=Math.hypot(dx,dy);padTouch.dx=dx/L;padTouch.dy=dy/L;padTouch.t=performance.now();input(classify(dx,dy),e.timeStamp,false,{dx,dy})}});
 cv.addEventListener('pointerup',e=>{if(drag){drag=null;persist()}const p=ptr[e.pointerId];delete ptr[e.pointerId];if(!p||p.done||deco)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;
-  if(scene==='knit'){if(Math.hypot(dx,dy)>=8)input(classify(dx,dy),e.timeStamp);else{const q=logical({clientX:p.x,clientY:p.y});input(q.x<J?'TL':'TR',p.t)}return}
+  if(scene==='knit'){if(Math.hypot(dx,dy)>=8)input(classify(dx,dy),e.timeStamp,false,{dx,dy});else{const q=logical({clientX:p.x,clientY:p.y}),pd=PAD();input(inPad(q)?(q.x<pd.x+pd.w/2?'TL':'TR'):q.x<J?'TL':'TR',p.t)}return}
   if(scene==='shop'&&$('orderP').hidden&&$('helpP').hidden){const q=logical(e),fc=frontCustomer();if(!anyPanel()&&lifeTap(q))return;if(fc&&fc.state==='wait'&&Math.abs(q.x-fc.x)<26&&q.y>88&&q.y<156)openOrder(fc)}});
 cv.addEventListener('pointercancel',e=>delete ptr[e.pointerId]);
 const KEYS={ArrowUp:'U',KeyF:'U',KeyW:'U',ArrowDown:'D',KeyJ:'D',KeyS:'D',ArrowLeft:'L',KeyA:'L',ArrowRight:'R',KeyG:'R',KeyE:'UR',KeyZ:'DL',KeyD:'TL',KeyK:'TR'};
@@ -1107,7 +1130,7 @@ function shopMusic(){if(!st.ac||st.ac.state!=='running')return;const a=st.ac,bt2
 function drawTitle(pn){drawShop(pn);ctx.fillStyle='rgba(29,20,32,.35)';ctx.fillRect(-OX,-OY,VW,VH)}
 function frame(){const pn=performance.now();
   try{const wr=$('wrap');if(wr.clientWidth!==fitW||wr.clientHeight!==fitH)fit();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=scene==='knit'?C.peach:C.wall;ctx.fillRect(0,0,VW,VH);ctx.setTransform(1,0,0,1,OX,OY);
-    if(scene==='knit'){const t=st.phase==='idle'?0:pnow();updateKnit(t);drawKnit(st.phase==='idle'?0:now())}
+    if(scene==='knit'){const t=st.phase==='idle'?0:pnow();updateKnit(t);drawKnit(st.phase==='idle'?0:now());drawPad(pn)}
     else{if(scene==='shop'&&!anyPanel()&&!deco)updateShop(pn);if(scene==='shop'&&owned('record'))shopMusic();if(scene==='title')drawTitle(pn);else drawShop(pn)}
     hud()}catch(e){console.error(e)}
   requestAnimationFrame(frame)}
@@ -1451,7 +1474,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af51e46';
+const BUILD='6af51f79';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
