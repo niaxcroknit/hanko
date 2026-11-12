@@ -229,9 +229,9 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
         <p>폭닥폭닥 작은 뜨개 가게를 꾸려요. 손님 주문을 받아 박자에 맞춰 와다다다 뜨고, 번 코인으로 도안책과 도구를 사요.</p>
         <div class="row"><span class="sub">속도</span>
           <div class="seg" id="speeds" role="group" aria-label="속도">
-            <button type="button" data-bpm="58" aria-pressed="false">느리게</button>
-            <button type="button" data-bpm="70" aria-pressed="true">보통</button>
-            <button type="button" data-bpm="86" aria-pressed="false">빠르게</button>
+            <button type="button" data-bpm="50" aria-pressed="false">느리게</button>
+            <button type="button" data-bpm="64" aria-pressed="true">보통</button>
+            <button type="button" data-bpm="80" aria-pressed="false">빠르게</button>
           </div></div>
         <div class="row"><button class="btn main" id="playBtn" type="button">영업 시작</button><button class="btn" id="titleHelp" type="button">게임 방법</button><button class="btn" id="calBtn" type="button">타이밍 맞추기</button><button class="btn" id="newBtn" type="button" hidden>처음부터</button></div>
         <p class="sub" id="saveNote"></p>
@@ -675,9 +675,9 @@ function iconFor(pk,yarn){const k=pk+yarn;if(iconCache.has(k))return iconCache.g
    6. Rhythm engine (one row = one bar, burst then rest)
    ========================================================= */
 const LEAD=2;
-let P=PAT.heart,N=8,ROWS=12,BPM=70,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
+let P=PAT.heart,N=8,ROWS=12,BPM=64,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
 function setup(){
-  N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.25,Math.min(.17,Math.max(.125,BT/4*.78))*({1:1.45,2:1.25,3:1.08}[P.lv]||1)*(owned('needle')?1.15:1)*(owned('silver')?1.15:1));PERF=Math.min(.085,GOOD*.45);ROW=[];let beat=LEAD;
+  N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.3,Math.min(.2,Math.max(.15,BT/4*.95))*({1:1.5,2:1.3,3:1.12}[P.lv]||1)*(owned('needle')?1.1:1)*(owned('silver')?1.1:1));PERF=Math.min(.1,GOOD*.45);ROW=[];let beat=LEAD;
   P.rows.forEach(([cells,r,cable],ri)=>{let pat=R16[r];if(order&&order.hard){const c=[...pat].filter(ch=>ch==='x').length,pool=HARD[c];if(pool)pat=pool[ri%pool.length]}const slots=[];[...pat].forEach((ch,k)=>{if(ch==='x')slots.push(k)});
     ROW.push({cells:typeof cells==='string'?cells.split(''):cells.slice(),cable:cable||null,start:beat,len:pat.length/4,slots});beat+=pat.length/4});
   TOTAL=beat}
@@ -1199,7 +1199,7 @@ function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=
   for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R)continue;x.fillStyle=d>R-3?'rgba(30,14,20,.12)':'rgba(30,14,20,.2)';x.fillRect(cx+xx,cy+yy,1,1)}
   const now=performance.now(),lit=st.press&&now-st.press.t<140?st.press.dir:null;
   /* rounded triangles pointing outward, leather with a brass edge; the pressed one glows */
-  const tri=(ax,ay,dx,dy,on)=>{const L=11,B=9,fill=on?'#d9a050':'#6b3f2c',hi=on?'#ffe0a0':'#9a6a48',lo=on?'#a8742c':'#4a2a1c';
+  const tri=(ax,ay,dx,dy,on)=>{const L=16,B=13,fill=on?'#d9a050':'#6b3f2c',hi=on?'#ffe0a0':'#9a6a48',lo=on?'#a8742c':'#4a2a1c';
     const at=(i,j,c)=>{x.fillStyle=c;x.fillRect(ax+dx*i+dy*j,ay+dy*i+dx*j,1,1)};
     const half=i=>i<1?1:i>L-2?Math.round(B*(i/(L-1)))-1:Math.round(B*(i/(L-1)));
     for(let i=0;i<L;i++){const hw=half(i);for(let j=-hw-1;j<=hw+1;j++)at(-i,j,C.ink)}
@@ -1464,7 +1464,7 @@ function openSettings(from){xBack=from||null;if(from)$(from).hidden=true;initAud
   const vv=document.createElement('b');vv.textContent=S.vol+'%';rng.addEventListener('input',()=>{S.vol=+rng.value;vv.textContent=S.vol+'%';applyVol()});rng.addEventListener('change',()=>{persist();testSound()});
   vol.append(rng,vv,mkBtn('소리 확인',null,testSound));row('음량',vol);
   row('가게 음악',seg([[true,'켜기'],[false,'끄기']],S.music,v=>S.music=v));
-  row('속도',seg([[58,'느리게'],[70,'보통'],[86,'빠르게']],BPM,v=>{BPM=v;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.bpm===v)))}));
+  row('속도',seg([[50,'느리게'],[64,'보통'],[80,'빠르게']],BPM,v=>{BPM=v;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.bpm===v)))}));
   row('엄지 받침',seg([[0,'작게'],[1,'보통'],[2,'크게']],S.pad,v=>S.pad=v));
   row('진동',seg([[true,'켜기'],[false,'끄기']],S.vib,v=>S.vib=v));
   const r=document.createElement('div');r.className='row';r.append(mkBtn('타이밍 맞추기',null,()=>{const back=xBack;$('xP').hidden=true;xBack=null;openCal(back||null)}));b.append(r);
@@ -1625,7 +1625,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af541da';
+const BUILD='6af5451c';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
