@@ -188,6 +188,19 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .hud{top:max(6px,calc(var(--u)*4))}
 .hud .grp{padding:0 max(14px,calc(var(--u)*7))!important;gap:max(12px,calc(var(--u)*6))!important;min-height:max(36px,calc(var(--u)*17))!important;font-size:max(13px,var(--fs))}
 .row{gap:max(12px,calc(var(--u)*6))}.tools{gap:max(10px,calc(var(--u)*5))}.tabs{gap:max(8px,calc(var(--u)*4))}
+
+/* ===== roomy store / bag layout ===== */
+#dayP .box,#bagP .box,#xP .box{width:min(calc(100% - 24px),calc(var(--u)*304))!important;max-width:none!important;max-height:calc(100% - 20px)!important}
+.store,.bag{grid-template-columns:repeat(auto-fill,minmax(min(100%,max(300px,calc(var(--u)*140))),1fr))!important;gap:max(12px,calc(var(--u)*6))!important}
+.item{padding:max(10px,calc(var(--u)*5)) max(12px,calc(var(--u)*6))!important;gap:max(12px,calc(var(--u)*6))!important;
+  clip-path:none!important;border:0!important;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #d8bfae!important;border-radius:0!important}
+.item canvas{width:max(30px,calc(var(--u)*16))!important;height:max(30px,calc(var(--u)*16))!important}
+.item b{margin-bottom:2px}.item small{line-height:1.35}
+.item .btn{min-width:max(96px,calc(var(--u)*40));white-space:nowrap}
+.item>div{min-width:0}
+.tabs{flex-wrap:nowrap!important;overflow-x:auto;overflow-y:hidden;padding:2px 2px 6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto}
 </style>
 
 <div id="wrap">
@@ -1552,7 +1565,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`í
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af5277b';
+const BUILD='6af528d0';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
