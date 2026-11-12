@@ -124,6 +124,50 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .swb[aria-pressed="true"]{outline:var(--u) solid var(--ink);outline-offset:var(--u);transform:translateY(calc(var(--u)*-1))}
 .rotate{display:none}
 @media (orientation:portrait) and (pointer:coarse){.rotate{display:grid;position:absolute;inset:0;place-items:center;background:#6a4a4f;background-image:radial-gradient(#5d4046 2px,transparent 2px);background-size:16px 16px;color:#f2e2d6;z-index:9;text-align:center;font-size:16px}}
+
+/* ===== antique pixel UI: carved wood plaques with brass trim, notched pixel corners, finger-sized ===== */
+#stage{--p:max(2px,calc(var(--u)*1));--tap:max(44px,calc(var(--u)*22));--bfs:max(14px,var(--fs))}
+.notch,.btn,.tabs button,.seg,.box,.hud .grp,.item,.letter,.works figure{
+  clip-path:polygon(0 calc(var(--p)*2),var(--p) calc(var(--p)*2),var(--p) var(--p),calc(var(--p)*2) var(--p),calc(var(--p)*2) 0,
+    calc(100% - var(--p)*2) 0,calc(100% - var(--p)*2) var(--p),calc(100% - var(--p)) var(--p),calc(100% - var(--p)) calc(var(--p)*2),100% calc(var(--p)*2),
+    100% calc(100% - var(--p)*2),calc(100% - var(--p)) calc(100% - var(--p)*2),calc(100% - var(--p)) calc(100% - var(--p)),calc(100% - var(--p)*2) calc(100% - var(--p)),calc(100% - var(--p)*2) 100%,
+    calc(var(--p)*2) 100%,calc(var(--p)*2) calc(100% - var(--p)),var(--p) calc(100% - var(--p)),var(--p) calc(100% - var(--p)*2),0 calc(100% - var(--p)*2))}
+.btn{min-height:var(--tap);min-width:var(--tap);padding:0 max(14px,calc(var(--u)*8));font-size:var(--bfs);border:0;border-radius:0;
+  color:#f7e8d6;text-shadow:0 var(--p) 0 #2a1a20;letter-spacing:.02em;
+  background:repeating-linear-gradient(180deg,#7a5446 0 calc(var(--p)*3),#6f4c3f calc(var(--p)*3) calc(var(--p)*4)),#7a5446;
+  box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #c9934a,inset 0 calc(var(--p)*3) 0 calc(var(--p)*2) #9a6a52,inset 0 calc(var(--p)*-3) 0 calc(var(--p)*2) #4a3028;
+  transition:transform .05s}
+.btn.main{color:#2a1a20;text-shadow:0 var(--p) 0 #fff3b0;background:linear-gradient(180deg,#ffe08a 0 45%,#ffcb5c 45% 100%);
+  box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #8f5a3c,inset 0 calc(var(--p)*3) 0 calc(var(--p)*2) #fff3b0,inset 0 calc(var(--p)*-3) 0 calc(var(--p)*2) #d69a3a}
+.btn.pink{color:#2a1a20;text-shadow:none;background:#f5a0b3}
+.btn:active:not(:disabled){transform:translateY(var(--p));filter:brightness(.92)}
+.btn:disabled{color:#b49a8c;text-shadow:none;background:#4f3a36;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #6a5048;cursor:not-allowed}
+.btn:focus-visible{outline:none;filter:brightness(1.12)}
+.row{gap:max(10px,calc(var(--u)*5))}
+.tools{gap:max(8px,calc(var(--u)*4))}
+.tools .btn{padding:0 max(12px,calc(var(--u)*6))}
+/* tabs: little brass-edged plaques */
+.tabs{gap:max(6px,calc(var(--u)*3))}
+.tabs button{min-height:max(38px,calc(var(--u)*18));padding:0 max(12px,calc(var(--u)*6));font-size:var(--bfs);border:0;border-radius:0;color:#f2e2d6;
+  background:#5d4046;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #8a6a62}
+.tabs button[aria-selected="true"]{background:#b85c72;color:#fff7ea;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #ffcb5c}
+/* segmented choices */
+.seg{border:0;border-radius:0;background:#2a1a20;padding:var(--p);gap:var(--p)}
+.seg button{min-height:max(38px,calc(var(--u)*18));padding:0 max(12px,calc(var(--u)*6));font-size:var(--bfs);display:inline-grid;place-items:center;background:#5d4046;color:#f2e2d6}
+.seg button[aria-pressed="true"]{background:#ffcb5c;color:#2a1a20}
+/* paper panels framed like an old shop card: ink line, brass inner line */
+.box{border:0;border-radius:0;padding:max(14px,calc(var(--u)*8)) max(16px,calc(var(--u)*10));
+  box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #d69a3a,inset 0 0 0 calc(var(--p)*3) #f2e2d6,inset 0 0 0 calc(var(--p)*4) #c9a98f}
+.item,.letter,.works figure{border:0;border-radius:0;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #d8bfae}
+/* HUD plaques */
+.hud .grp{border:0;border-radius:0;background:#f2e2d6;padding:0 max(8px,calc(var(--u)*5));min-height:max(30px,calc(var(--u)*14));
+  box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #c9934a}
+.pbtn{min-width:max(36px,calc(var(--u)*16));min-height:max(30px,calc(var(--u)*14));font-size:var(--bfs)}
+#pauseBtn{border:0;border-radius:0;background:#7a5446;box-shadow:inset 0 0 0 var(--p) #2a1a20,inset 0 0 0 calc(var(--p)*2) #c9934a,inset 0 calc(var(--p)*-3) 0 calc(var(--p)*2) #4a3028}
+#pauseBtn i{background:#f7e8d6;border-radius:0;box-shadow:0 var(--p) 0 #2a1a20}
+#pauseBtn{clip-path:polygon(0 calc(var(--p)*3),var(--p) calc(var(--p)*3),var(--p) var(--p),calc(var(--p)*3) var(--p),calc(var(--p)*3) 0,calc(100% - var(--p)*3) 0,calc(100% - var(--p)*3) var(--p),calc(100% - var(--p)) var(--p),calc(100% - var(--p)) calc(var(--p)*3),100% calc(var(--p)*3),100% calc(100% - var(--p)*3),calc(100% - var(--p)) calc(100% - var(--p)*3),calc(100% - var(--p)) calc(100% - var(--p)),calc(100% - var(--p)*3) calc(100% - var(--p)),calc(100% - var(--p)*3) 100%,calc(var(--p)*3) 100%,calc(var(--p)*3) calc(100% - var(--p)),var(--p) calc(100% - var(--p)),var(--p) calc(100% - var(--p)*3),0 calc(100% - var(--p)*3))}
+.swb{min-width:max(36px,calc(var(--u)*16));min-height:max(30px,calc(var(--u)*13))}
+.code{min-height:max(38px,calc(var(--u)*18));font-size:var(--bfs)}
 </style>
 
 <div id="wrap">
@@ -1474,7 +1518,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`í
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af51f79';
+const BUILD='6af52155';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
