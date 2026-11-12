@@ -84,7 +84,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .dots i{width:calc(var(--u)*4);height:calc(var(--u)*4);border-radius:50%;background:var(--paper-2);border:var(--u) solid var(--ink)}
 .dots i.on{background:var(--pink)}
 .cat{color:var(--muted)}
- #pauseBtn,#setBtn{position:absolute;z-index:1;top:calc(var(--edge) + max(36px,calc(var(--u)*17)) + max(10px,calc(var(--u)*5)));right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
+ #pauseBtn,#setBtn{position:absolute;z-index:1;top:calc(var(--edge) + max(36px,calc(var(--u)*17)) + max(10px,calc(var(--u)*5)));left:max(calc(var(--u)*5),env(safe-area-inset-left,0px));width:max(44px,calc(var(--u)*20));height:max(44px,calc(var(--u)*20));
   border:var(--u) solid var(--ink);border-radius:50%;background:rgba(242,226,214,.92);box-shadow:0 var(--u) 0 var(--ink);display:grid;grid-auto-flow:column;place-content:center;gap:22%;cursor:pointer;touch-action:manipulation;padding:0}
 #pauseBtn i{display:block;width:max(5px,calc(var(--u)*2.5));height:max(16px,calc(var(--u)*8));background:var(--ink);border-radius:2px}
 #pauseBtn:active,#setBtn:active{transform:translateY(var(--u));box-shadow:none}
@@ -916,7 +916,7 @@ function drawKnit(t){
   const s=st.stats;
   if(st.phase==='play'&&s.combo>=4){const k=Math.min(1,(pn-st.comboT)/120);txt(`${s.combo} 콤보`,Math.min(262,LR-34),LANE-6-(k<1?1:0),st.level>=1?C.goldD:C.ink,'center',12,true,'#e2ccbc')}
   st.pops=st.pops.filter(p=>pn-p.t<800);st.pops.forEach((p,i)=>{const k=(pn-p.t)/800;txt(p.text,250,LT-16-i*13-Math.round(k*5),p.color,'center',12,true,C.ink)});
-  if(st.phase==='play'&&order){softLabel(`${st.score.toLocaleString()}점`,-OX+46,hudBottomY()+5);
+  if(st.phase==='play'&&order){softLabel(`${st.score.toLocaleString()}점`,W+OX-40,hudBottomY()+5);
     if(st.fever&&pn-st.feverT<1200)txt('피버 타임!',J,58,C.gold,'center',24,true,C.ink)}
   if(st.phase==='play'){const b=Math.floor((t-st.start)/BT);if(b>=0&&b<LEAD)txt(['준비','시작!'][b],J,70,'#e3869b','center',24,true,C.ink);
     const intro=lane.filter(n=>n.intro&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD).sort((a,b)=>a.t-b.t)[0];
@@ -1625,7 +1625,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af5461e';
+const BUILD='6af55135';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
