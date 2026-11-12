@@ -547,14 +547,14 @@ function makeCustomerOld(){
   const pats=['heart',...BOOKS.filter(owned)],newest=save.lastBook&&owned(save.lastBook)?save.lastBook:pats[pats.length-1];
   const pk=Math.random()<.4?newest:rnd(pats),P=PAT[pk],ys=yarns(),y=rnd(ys),y2=rnd(ys.filter(v=>v[0]!==y[0]));
   return{pal:{hair:rnd(HAIR),shirt:rnd(SHIRT),pants:rnd(PANTS),skin:rnd(SKIN),hat:Math.random()<.35?rnd(HATC):null,scarf:Math.random()<.35?rnd(HATC):null},x:W+OX+8,tx:W+OX+8,state:'in',mood:null,moodT:0,pk,item:rnd(P.items),yarn:y[0],yarnName:y[1],yarn2:y2[0],yarn2Name:y2[1],line:rnd(LINES),bob:Math.random()*6}}
-function startDay(){shop.custs=[];shop.spawned=0;shop.total=custPerDay();shop.nextSpawn=performance.now()+600;shop.coinsFx=[];shop.ending=false;save.earnedToday=0;save.served=0;lifeStartDay();
+function startDay(){shop.custs=[];shop.spawned=0;shop.total=custPerDay();shop.nextSpawn=performance.now()+150;shop.coinsFx=[];shop.ending=false;save.earnedToday=0;save.served=0;lifeStartDay();
   if(owned('display')&&save.made.length){const fee=Math.min(save.made.length,6)*5;save.coins+=fee;toast(`진열 관람료 +${fee}코인`)}persist();
   scene='shop';showHud()}
 function layoutQueue(){let k=0;for(const c of shop.custs){if(c.state==='leave')continue;c.tx=COUNTER_X+k*SLOT;k++}}
 function frontCustomer(){return shop.custs.find(c=>c.state!=='leave'&&c.state!=='done')}
 function updateShop(pn){
   if(shop.spawned<shop.total&&pn>shop.nextSpawn&&shop.custs.filter(c=>c.state!=='leave').length<4){shop.custs.push(makeCustomer());shop.spawned++;shop.nextSpawn=pn+1800+Math.random()*1200;bell();layoutQueue()}
-  for(const c of shop.custs){const d=c.tx-c.x;if(Math.abs(d)>.5){c.x+=Math.sign(d)*Math.min(Math.abs(d),.9);c.walking=true}else{c.x=c.tx;c.walking=false;if(c.state==='in')c.state='wait'}}
+  for(const c of shop.custs){const d=c.tx-c.x;if(Math.abs(d)>.5){c.x+=Math.sign(d)*Math.min(Math.abs(d),c.state==='in'||c.state==='leave'?1.7:.9);c.walking=true}else{c.x=c.tx;c.walking=false;if(c.state==='in')c.state='wait'}}
   shop.custs=shop.custs.filter(c=>!(c.state==='leave'&&c.x>=W+OX+6));
   if(!shop.ending&&shop.spawned>=shop.total&&shop.custs.length===0&&scene==='shop'){shop.ending=true;setTimeout(endDay,700)}
 }
@@ -640,16 +640,13 @@ function drawShop(pn){
   /* customers */
   const sorted=shop.custs.slice().sort((a,b)=>a.x-b.x);
   for(const c of sorted){const fr=custSprites(c.pal),f=c.walking?Math.floor(pn/160+c.bob)%2:0,hop=c.mood==='happy'?Math.max(0,Math.sin((pn-c.moodT)/90))*3:Math.round(Math.sin(pn/500+c.bob)*.6+.4);
-    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-5,151,12,2);x.drawImage(fr[f],Math.round(c.x)-7,134-hop);custDeco(x,c,pn)}
+    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-5,145,12,2);x.drawImage(fr[f],Math.round(c.x)-7,128-hop);custDeco(x,c,pn)}
   drawBlackout(x,pn);
   /* order bubble */
   const fc=frontCustomer();
-  if(fc&&fc.state==='wait'&&scene==='shop'&&!deco){const bx=Math.round(fc.x)-20,by=96,blink=Math.floor(pn/450)%2;
-    rrect(x,bx,by,42,26,C.cream);x.fillStyle=C.ink;x.fillRect(bx+19,by+26,4,1);x.fillRect(bx+20,by+27,2,1);x.fillStyle=C.cream;x.fillRect(bx+20,by+25,2,2);
-    x.drawImage(iconFor(fc.pk,fc.yarn),bx+4,by+5);if(fc.golden){x.fillStyle=C.gold;x.fillRect(bx+1,by+1,40,1)}
-    if(blink)heartPx(x,bx+32,by+6,C.red);x.drawImage(COIN,bx+30,by+15)}
+  if(fc&&fc.state==='wait'&&scene==='shop'&&!deco)drawBubble(x,fc,pn);
   /* mood bubbles */
-  for(const c of shop.custs){if(!c.mood)continue;const t=(pn-c.moodT)/1000;if(t>2.4)continue;const bx=Math.round(c.x)-5,by=112-t*8;
+  for(const c of shop.custs){if(!c.mood)continue;const t=(pn-c.moodT)/1000;if(t>2.4)continue;const bx=Math.round(c.x)-5,by=106-t*8;
     if(c.mood==='happy'){x.drawImage(HEART,bx,by);if(t>.2)x.drawImage(HEART,bx+9,by+5);if(t>.4)x.drawImage(HEART,bx-7,by+7)}else x.drawImage(SWEAT,bx+8,by+8)}
   /* coins */
   shop.coinsFx=shop.coinsFx.filter(f=>pn-f.t<900);
@@ -668,7 +665,7 @@ function iconFor(pk,yarn){const k=pk+yarn;if(iconCache.has(k))return iconCache.g
 /* =========================================================
    6. Rhythm engine (one row = one bar, burst then rest)
    ========================================================= */
-const LEAD=4;
+const LEAD=2;
 let P=PAT.heart,N=8,ROWS=12,BPM=78,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
 function setup(){
   N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.21,Math.min(.14,Math.max(.1,BT/4*.62))*({1:1.45,2:1.2,3:1}[P.lv]||1)*(owned('needle')?1.2:1)*(owned('silver')?1.2:1));PERF=Math.min(.07,GOOD*.42);ROW=[];let beat=LEAD;
@@ -906,7 +903,7 @@ function drawKnit(t){
       const txt2=`최고 기록보다 ${diff>=0?'+':''}${diff.toLocaleString()}`;pill(txt2,252,20,diff>=0?'#d6f2df':'#f6d2d2',C.ink,130)}
     else if(st.score)pill(`${st.score.toLocaleString()}점`,270,20,C.cream,C.ink,90);
     if(st.fever&&pn-st.feverT<1200)txt('피버 타임!',J,58,C.gold,'center',24,true,C.ink)}
-  if(st.phase==='play'){const b=Math.floor((t-st.start)/BT);if(b>=0&&b<LEAD)txt(['3','2','1','시작!'][b],J,70,'#e3869b','center',24,true,C.ink);
+  if(st.phase==='play'){const b=Math.floor((t-st.start)/BT);if(b>=0&&b<LEAD)txt(['준비','시작!'][b],J,70,'#e3869b','center',24,true,C.ink);
     const intro=lane.filter(n=>n.intro&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD).sort((a,b)=>a.t-b.t)[0];
     if(intro){const M=MOVE[intro.kind];pill(`새 기법! ${M.name}: ${M.how}`,J,90,C.cream)}
     else{const sp=lane.find(n=>n.introSpecial&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD);if(sp)pill({golden:'황금 실: 맞히면 보너스 코인!',tangle:'엉킨 실: 판정 원 한가운데서 정확히!',wobble:'고양이가 실을 건드렸어요! 흔들려도 박자는 그대로'}[sp.introSpecial],J,90,C.cream)}}
@@ -941,7 +938,7 @@ const priceMul=()=>1+(owned('merino')?.2:0)+(owned('alpaca')?.3:0)+(owned('grad'
 const payFor=(pk,acc)=>Math.round(PAT[pk].base*priceMul()*(.3+.7*acc));
 const tipFor=(pk,stars)=>stars<2?0:Math.round(PAT[pk].base*priceMul()*((stars===3?.2:.05)+(owned('rug')?.1:0)+(owned('plant')?.05:0)+(owned('cattoy')?.05:0)+(owned('wrap')?.15:0)));
 function beginKnit(){
-  $('orderP').hidden=true;P=PAT[order.pk];YARN=order.yarn;initAudio();resetKnit();st.start=st.ac.currentTime+.6;loadRow(0);st.nextBeat=0;st.phase='play';scene='knit';
+  $('orderP').hidden=true;P=PAT[order.pk];YARN=order.yarn;initAudio();resetKnit();st.start=st.ac.currentTime+.3;loadRow(0);st.nextBeat=0;st.phase='play';scene='knit';
   $('legend').innerHTML=legendHtml();$('legend').hidden=false;focusStage()}
 let lastResult=null;
 function finishKnit(){
@@ -1174,21 +1171,24 @@ function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;fitW=w;fit
 addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 /* thumb pad on the right: the swipe can start anywhere, but this gives the thumb a home that is not the judge circle */
 const TOUCH=matchMedia('(pointer:coarse)').matches;
-const PAD=()=>{const w=68,x1=W+OX-14;return{x:x1-w,y:62,w,h:68}};
+const PAD=()=>{const w=80,x1=W+OX-10;return{x:x1-w,y:52,w,h:80}};
 const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
 function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q.y<=p.y+p.h+6}
 function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
   for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R)continue;x.fillStyle=d>R-3?'rgba(30,14,20,.12)':'rgba(30,14,20,.2)';x.fillRect(cx+xx,cy+yy,1,1)}
   const now=performance.now(),lit=st.press&&now-st.press.t<140?st.press.dir:null;
-  const key=(kx,ky,g,on)=>{const S=13,l=kx-6,t=ky-6;
-    x.fillStyle='rgba(30,14,20,.45)';x.fillRect(l+1,t+S,S-2,1);
-    x.fillStyle=C.ink;x.fillRect(l+1,t,S-2,S);x.fillRect(l,t+1,S,S-2);
-    x.fillStyle=on?'#c98a4a':'#6b3f2c';x.fillRect(l+1,t+1,S-2,S-2);
-    x.fillStyle=on?'#f0c070':'#8a5638';x.fillRect(l+2,t+1,S-4,1);x.fillStyle='#4a2a1c';x.fillRect(l+2,t+S-2,S-4,1);
-    x.fillStyle='#e0b050';x.fillRect(l+1,t+1,1,1);x.fillRect(l+S-2,t+1,1,1);x.fillRect(l+1,t+S-2,1,1);x.fillRect(l+S-2,t+S-2,1,1);
-    x.fillStyle=on?'#fff4dc':'#f6d890';GLY[g].forEach((r,yy)=>[...r].forEach((ch,xx)=>{if(ch==='x')x.fillRect(l+4+xx,t+4+yy,1,1)}))};
-  const e=R-9;key(cx,cy-e,'U',lit==='U');key(cx,cy+e,'D',lit==='D');
-  if(taps){key(cx-e,cy,'TL',lit==='TL');key(cx+e,cy,'TR',lit==='TR')}else{key(cx-e,cy,'L',lit==='L');key(cx+e,cy,'R',lit==='R')}
+  /* rounded triangles pointing outward, leather with a brass edge; the pressed one glows */
+  const tri=(ax,ay,dx,dy,on)=>{const L=11,B=9,fill=on?'#d9a050':'#6b3f2c',hi=on?'#ffe0a0':'#9a6a48',lo=on?'#a8742c':'#4a2a1c';
+    const at=(i,j,c)=>{x.fillStyle=c;x.fillRect(ax+dx*i+dy*j,ay+dy*i+dx*j,1,1)};
+    const half=i=>i<1?1:i>L-2?Math.round(B*(i/(L-1)))-1:Math.round(B*(i/(L-1)));
+    for(let i=0;i<L;i++){const hw=half(i);for(let j=-hw-1;j<=hw+1;j++)at(-i,j,C.ink)}
+    for(let i=-1;i>-1-1;i--)for(let j=-1;j<=1;j++)at(1,j,C.ink);
+    for(let i=0;i<L-1;i++){const hw=half(i);for(let j=-hw;j<=hw;j++)at(-i,j,i===0||Math.abs(j)===hw?hi:i===L-2?lo:fill)}
+    at(-L+2,0,on?'#fff4dc':'#e0b050')};
+  const e=R-6,tx=Math.round;
+  tri(cx,cy-e,0,-1,lit==='U');tri(cx,cy+e,0,1,lit==='D');
+  tri(cx-e,cy,-1,0,lit==='L'||lit==='TL');tri(cx+e,cy,1,0,lit==='R'||lit==='TR');
+  if(taps){x.fillStyle='rgba(246,216,144,.35)';for(let yy=-R+14;yy<R-13;yy+=3)x.fillRect(cx,cy+yy,1,2)}
   const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);x.globalAlpha=1}}
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
@@ -1401,12 +1401,24 @@ function drawYarnBall(x,cx,cy,r,col,k,pn){const dk=shade(col,.72),lt=shade(col,1
   if(k<8&&n>3){x.fillStyle=dk;x.fillRect(cx+r+3,cy+r-4,3,1);x.fillRect(cx+r+5,cy+r-5,1,3)}
   if(!k&&Math.floor(pn/500)%2){x.fillStyle=C.gold;x.fillRect(cx-1,cy-r-8,2,4);x.fillRect(cx-1,cy-r-3,2,1)}
   if(k){x.fillStyle=C.cream;for(let i=0;i<8;i++){x.fillStyle=i<k?C.gold:'rgba(242,226,214,.5)';x.fillRect(cx-8+i*2,cy-r-5,1,2)}}}
+/* order bubble: soft rounded cloud with a little tail, the wanted swatch in a frame, a yarn ball of the colour and a coin */
+function drawBubble(x,c,pn){const w=40,h=26,bx=Math.round(c.x)-w/2,by=Math.round(90+Math.sin(pn/420)*1.2),edge=c.golden?C.goldD:C.ink,paper=c.golden?'#fff3cc':'#fff7ea';
+  x.fillStyle='rgba(30,14,20,.28)';x.fillRect(bx+3,by+h+1,w-4,2);
+  const shape=(o,col)=>{x.fillStyle=col;x.fillRect(bx+3-o,by-o,w-6+2*o,h+2*o);x.fillRect(bx+1-o,by+1-o,w-2+2*o,h-2+2*o);x.fillRect(bx-o,by+3-o,w+2*o,h-6+2*o)};
+  shape(1,edge);shape(0,paper);x.fillStyle=c.golden?'#f2dca0':'#efe0cc';x.fillRect(bx+2,by+h-2,w-4,1);x.fillRect(bx+1,by+h-3,1,1);x.fillRect(bx+w-2,by+h-3,1,1);
+  const tx=Math.round(c.x);x.fillStyle=edge;x.fillRect(tx-3,by+h,7,1);x.fillRect(tx-2,by+h+1,5,1);x.fillRect(tx-1,by+h+2,3,1);x.fillRect(tx,by+h+3,1,1);
+  x.fillStyle=paper;x.fillRect(tx-2,by+h-1,5,1);x.fillRect(tx-1,by+h,3,1);x.fillRect(tx,by+h+1,1,1);
+  x.fillStyle=edge;x.fillRect(bx+4,by+4,18,18);x.drawImage(iconFor(c.pk,c.yarn),bx+5,by+5);
+  const yb=bx+30,yy=by+9,col=c.yarn;for(let v=-4;v<=4;v++)for(let u=-4;u<=4;u++){const d=Math.hypot(u+.5,v+.5);if(d>4.2)continue;
+    let cc=d>3.2?C.ink:col;if(cc===col&&((u+v+8)%3===0))cc=shade(col,.78);if(cc!==C.ink&&u<-1&&v<-1)cc=shade(col,1.3);x.fillStyle=cc;x.fillRect(yb+u,yy+v,1,1)}
+  const k=Math.floor(pn/450)%2;x.drawImage(COIN,bx+27,by+16+(k?0:-1));if(c.golden&&k){x.fillStyle=C.gold;x.fillRect(bx-3,by+2,2,2);x.fillRect(bx+w+1,by+h-6,2,2)}
+  if(c.reg)heartPx(x,bx+w-7,by+3,C.rose)}
 function drawBlackout(x,pn){const T=save.today;if(!T||!T.blackout||scene==='title')return;x.fillStyle='rgba(12,6,14,.5)';x.fillRect(-OX,-OY,VW,VH);
   x.fillStyle=C.cream;x.fillRect(72,84,3,7);x.fillStyle=Math.floor(pn/150)%2?'#ffd36b':'#ff9e4a';x.fillRect(72,80,3,4);
   for(let k=64;k>0;k-=8){x.fillStyle='rgba(255,190,110,.06)';x.beginPath();x.arc(73,84,k,0,7);x.fill()}}
 function custDeco(x,c,pn){const cx2=Math.round(c.x);
-  if(c.golden&&Math.floor(pn/220)%2){x.fillStyle=C.gold;x.fillRect(cx2-9,134,2,2);x.fillRect(cx2+8,139,2,2);x.fillRect(cx2+6,129,1,1);x.fillRect(cx2-6,127,1,1)}
-  if(c.reg)heartPx(x,cx2-1,128,C.rose)}
+  if(c.golden&&Math.floor(pn/220)%2){x.fillStyle=C.gold;x.fillRect(cx2-9,128,2,2);x.fillRect(cx2+8,133,2,2);x.fillRect(cx2+6,123,1,1);x.fillRect(cx2-6,121,1,1)}
+  if(c.reg)heartPx(x,cx2-1,122,C.rose)}
 function lifeTap(q){const T=save.today;if(!T)return false;
   if(T.tangle&&!T.tg.done&&Math.hypot(q.x-TG.x,q.y-TG.y)<13){T.tg.taps++;shop.tgT=performance.now();initAudio();tone(st.ac.currentTime,hz(74+T.tg.taps*2),'square',.04,.06,.002);
     if(T.tg.taps>=8){T.tg.done=true;save.coins+=15;coinSfx(3);toast('엉킨 실뭉치를 다 풀었어요! +15코인');T.log.events.push('엉킨 실뭉치를 끝까지 풀었다.');ev('tangle',1);persist()}return true}
@@ -1573,7 +1585,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af52bb7';
+const BUILD='6af52d8e';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
