@@ -1255,8 +1255,8 @@ function drawToast(pn){if(scene!=='shop'||anyPanel())return;
   if(shop.toastCur){const k=(pn-shop.toastCur.t)/2600;softLabel(shop.toastCur.text,160,48,k<.08?k/.08:k>.88?(1-k)/.12:1)}}
 /* a notice with no box: cream text over a soft dark blur, like a shadow behind it */
 function softLabel(text,cx,y,alpha=1){const x=ctx;x.save();x.font='12px Galmuri11';const w=Math.ceil(x.measureText(text).width),h=14,l=Math.round(Math.max(8-OX,Math.min(W+OX-8-w,cx-w/2)));
-  x.globalAlpha=alpha;x.fillStyle='#000';x.shadowColor='rgba(20,8,14,.62)';x.shadowBlur=9*SCALE_PX;x.shadowOffsetX=2000*SCALE_PX;
-  x.fillRect(l-4-2000,y-1,w+8,h+2);x.fillRect(l-2-2000,y+1,w+4,h-2);
+  x.globalAlpha=alpha;x.fillStyle='#000';x.shadowColor='rgba(16,6,10,.8)';x.shadowBlur=6;x.shadowOffsetX=2000;
+  for(let i=0;i<2;i++){x.fillRect(l-3-2000,y,w+6,h);x.fillRect(l-1-2000,y-2,w+2,h+4)}
   x.shadowColor='transparent';x.shadowBlur=0;x.shadowOffsetX=0;
   x.textAlign='left';x.textBaseline='top';x.fillStyle='rgba(20,8,14,.85)';x.fillText(text,l,y+2);x.fillStyle='#fff3dc';x.fillText(text,l,y+1);x.restore()}
 
@@ -1545,7 +1545,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`í
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af5256f';
+const BUILD='6af52584';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
