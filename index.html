@@ -222,9 +222,9 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
         <p>폭닥폭닥 작은 뜨개 가게를 꾸려요. 손님 주문을 받아 박자에 맞춰 와다다다 뜨고, 번 코인으로 도안책과 도구를 사요.</p>
         <div class="row"><span class="sub">속도</span>
           <div class="seg" id="speeds" role="group" aria-label="속도">
-            <button type="button" data-bpm="62" aria-pressed="false">느리게</button>
-            <button type="button" data-bpm="78" aria-pressed="true">보통</button>
-            <button type="button" data-bpm="92" aria-pressed="false">빠르게</button>
+            <button type="button" data-bpm="58" aria-pressed="false">느리게</button>
+            <button type="button" data-bpm="70" aria-pressed="true">보통</button>
+            <button type="button" data-bpm="86" aria-pressed="false">빠르게</button>
           </div></div>
         <div class="row"><button class="btn main" id="playBtn" type="button">영업 시작</button><button class="btn" id="titleHelp" type="button">게임 방법</button><button class="btn" id="calBtn" type="button">타이밍 맞추기</button><button class="btn" id="newBtn" type="button" hidden>처음부터</button></div>
         <p class="sub" id="saveNote"></p>
@@ -666,9 +666,9 @@ function iconFor(pk,yarn){const k=pk+yarn;if(iconCache.has(k))return iconCache.g
    6. Rhythm engine (one row = one bar, burst then rest)
    ========================================================= */
 const LEAD=2;
-let P=PAT.heart,N=8,ROWS=12,BPM=78,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
+let P=PAT.heart,N=8,ROWS=12,BPM=70,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
 function setup(){
-  N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.21,Math.min(.14,Math.max(.1,BT/4*.62))*({1:1.45,2:1.2,3:1}[P.lv]||1)*(owned('needle')?1.2:1)*(owned('silver')?1.2:1));PERF=Math.min(.07,GOOD*.42);ROW=[];let beat=LEAD;
+  N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.25,Math.min(.17,Math.max(.125,BT/4*.78))*({1:1.45,2:1.25,3:1.08}[P.lv]||1)*(owned('needle')?1.15:1)*(owned('silver')?1.15:1));PERF=Math.min(.085,GOOD*.45);ROW=[];let beat=LEAD;
   P.rows.forEach(([cells,r,cable],ri)=>{let pat=R16[r];if(order&&order.hard){const c=[...pat].filter(ch=>ch==='x').length,pool=HARD[c];if(pool)pat=pool[ri%pool.length]}const slots=[];[...pat].forEach((ch,k)=>{if(ch==='x')slots.push(k)});
     ROW.push({cells:typeof cells==='string'?cells.split(''):cells.slice(),cable:cable||null,start:beat,len:pat.length/4,slots});beat+=pat.length/4});
   TOTAL=beat}
@@ -708,7 +708,7 @@ const pnow=()=>now()-((save&&save.offset)||0)/1000;
 function initAudio(){
   if(!st.ac){st.ac=new (window.AudioContext||window.webkitAudioContext)();
     const len=st.ac.sampleRate*.6,buf=st.ac.createBuffer(1,len,st.ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;st.noise=buf;
-    const comp=st.ac.createDynamicsCompressor();comp.connect(st.ac.destination);st.master=st.ac.createGain();st.master.gain.value=.7;st.master.connect(comp)}
+    const comp=st.ac.createDynamicsCompressor();const boost=st.ac.createGain();boost.gain.value=1.7;comp.connect(boost).connect(st.ac.destination);st.master=st.ac.createGain();st.master.gain.value=1;st.master.connect(comp)}
   st.ac.resume()}
 function env(g,t,p,d,a=.004){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d)}
 function tone(t,f,type,p,d,a){if(!st.ac)return;const o=st.ac.createOscillator(),g=st.ac.createGain();o.type=type;o.frequency.value=f;env(g,t,p,d,a);o.connect(g).connect(st.master);o.start(t);o.stop(t+d+.05)}
@@ -784,7 +784,7 @@ function input(dir,stamp,key,vec){
   let match=cand[0]||null;
   const md=match?(match.pi===1?Math.min(Math.abs(match.t-t),Math.abs(match.s.parts[0].t-t)):Math.abs(match.t-t)):9;
   if(match&&match.dir==='ANY'){match.s.a=dir==='D'?'P':'K';match.kind=match.s.a}
-  if(match&&match.tangle&&md>PERF*1.6){judge(match,'miss');pop('엉킨 실은 정확하게!',C.amber)}
+  if(match&&match.tangle&&md>PERF*2.2){judge(match,'miss');pop('엉킨 실은 정확하게!',C.amber)}
   else if(match)judge(match,md<=PERF?'perfect':'good');
   else if(other&&!st.notes.some(n=>!n.res&&(n.dir===dir||n.dir==='ANY')&&Math.abs(n.t-t)<GOOD*2.5)){pop(other.dir==='TL'||other.dir==='TR'?(other.pi===1?'따닥 순서!':'탭!'):`${{U:'↑',D:'↓',L:'←',R:'→',UR:'↗',DL:'↙',ANY:'↑↓'}[other.dir]} 방향이에요`,C.red);if(st.ac)tone(st.ac.currentTime,hz(50),'square',.03,.06,.002);st.jabT=performance.now()-70}
   else{let nd=9;for(const n of st.notes){if(n.res||n.dir!==dir)continue;const d=n.t-t;if(Math.abs(d)<Math.abs(nd))nd=d}
@@ -899,9 +899,7 @@ function drawKnit(t){
   const s=st.stats;
   if(st.phase==='play'&&s.combo>=4){const k=Math.min(1,(pn-st.comboT)/120);txt(`${s.combo} 콤보`,Math.min(262,LR-34),LANE-6-(k<1?1:0),st.level>=1?C.goldD:C.ink,'center',12,true,'#e2ccbc')}
   st.pops=st.pops.filter(p=>pn-p.t<800);st.pops.forEach((p,i)=>{const k=(pn-p.t)/800;txt(p.text,250,LT-16-i*13-Math.round(k*5),p.color,'center',12,true,C.ink)});
-  if(st.phase==='play'&&order){const bk=bestKey(),best=(save.best||{})[bk];if(best&&best.score){const f=Math.max(0,Math.min(1,(t-bt(LEAD))/((TOTAL-LEAD)*BT))),diff=Math.round(st.score-best.score*f);
-      const txt2=`최고 기록보다 ${diff>=0?'+':''}${diff.toLocaleString()}`;pill(txt2,252,20,diff>=0?'#d6f2df':'#f6d2d2',C.ink,130)}
-    else if(st.score)pill(`${st.score.toLocaleString()}점`,270,20,C.cream,C.ink,90);
+  if(st.phase==='play'&&order){softLabel(`${st.score.toLocaleString()}점`,-OX+46,hudBottomY()+5);
     if(st.fever&&pn-st.feverT<1200)txt('피버 타임!',J,58,C.gold,'center',24,true,C.ink)}
   if(st.phase==='play'){const b=Math.floor((t-st.start)/BT);if(b>=0&&b<LEAD)txt(['준비','시작!'][b],J,70,'#e3869b','center',24,true,C.ink);
     const intro=lane.filter(n=>n.intro&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD).sort((a,b)=>a.t-b.t)[0];
@@ -1151,7 +1149,7 @@ $('pauseBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropag
 $('resumeBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();st.phase='play';focusStage()});
 $('restartBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();beginKnit()});
 /* leave the knitting without penalty: the customer keeps waiting at the counter and can be served again */
-$('quitBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.phase='idle';st.notes=[];st.sts=[];if(st.master){const g=st.master.gain,t=st.ac.currentTime;g.setValueAtTime(0,t);g.setValueAtTime(.7,t+.3)}st.ac.resume();
+$('quitBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.phase='idle';st.notes=[];st.sts=[];if(st.master){const g=st.master.gain,t=st.ac.currentTime;g.setValueAtTime(0,t);g.setValueAtTime(1,t+.3)}st.ac.resume();
   $('legend').hidden=true;scene='shop';if(order&&order.c&&order.c.state!=='leave')order.c.state='wait';order=null;toast('뜨개를 멈추고 가게로 나왔어요. 손님은 기다려줘요');focusStage()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 addEventListener('blur',()=>pause('blur'));
@@ -1173,6 +1171,11 @@ addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventL
 const TOUCH=matchMedia('(pointer:coarse)').matches;
 const PAD=()=>{const w=80,x1=W+OX-10;return{x:x1-w,y:H-w-4,w,h:80}};
 const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
+function padDirs(){const ins=new Set(P.moves.flatMap(m=>MOVE[m].ins));return{h:ins.has('TL')||ins.has('TR')?['TL','TR']:['L','R'],diag:ins.has('UR')||ins.has('DL')}}
+/* which key a touch on the thumb rest means: nearest of the directions this pattern uses (the very middle is left for swipes) */
+function padKey(q){if(!TOUCH||st.phase!=='play')return null;const p=PAD(),cx=p.x+p.w/2,cy=p.y+p.h/2,dx=q.x-cx,dy=q.y-cy,r=Math.hypot(dx,dy);if(r<9||r>p.w/2+8)return null;
+  const a=Math.atan2(dy,dx)*180/Math.PI,D=padDirs(),opts=[['U',-90],['D',90],[D.h[0],180],[D.h[1],0]];if(D.diag)opts.push(['UR',-45],['DL',135]);
+  let best=null,bd=999;for(const [d,ang] of opts){let g=Math.abs(a-ang)%360;if(g>180)g=360-g;if(g<bd){bd=g;best=d}}return best}
 function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q.y<=p.y+p.h+6}
 function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
   for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R)continue;x.fillStyle=d>R-3?'rgba(30,14,20,.12)':'rgba(30,14,20,.2)';x.fillRect(cx+xx,cy+yy,1,1)}
@@ -1189,11 +1192,12 @@ function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=
   tri(cx,cy-e,0,-1,lit==='U');tri(cx,cy+e,0,1,lit==='D');
   tri(cx-e,cy,-1,0,lit==='L'||lit==='TL');tri(cx+e,cy,1,0,lit==='R'||lit==='TR');
   if(taps){x.fillStyle='rgba(246,216,144,.35)';for(let yy=-R+14;yy<R-13;yy+=3)x.fillRect(cx,cy+yy,1,2)}
+  if(padDirs().diag){const o=Math.round(e*.62);txt('↗',cx+o,cy-o-7,lit==='UR'?'#ffe0a0':'rgba(246,216,144,.8)','center',12,true,C.ink);txt('↙',cx-o,cy+o-7,lit==='DL'?'#ffe0a0':'rgba(246,216,144,.8)','center',12,true,C.ink)}
   const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);x.globalAlpha=1}}
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
 const ptr={};
-cv.addEventListener('pointerdown',e=>{ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};if(scene==='knit'){const q=logical(e);Object.assign(padTouch,{x:q.x,y:q.y,t:performance.now(),dx:0,dy:0})}try{cv.setPointerCapture(e.pointerId)}catch(_){}
+cv.addEventListener('pointerdown',e=>{ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};if(scene==='knit'){const q=logical(e);Object.assign(padTouch,{x:q.x,y:q.y,t:performance.now(),dx:0,dy:0});const d=padKey(q);if(d){ptr[e.pointerId].done=true;input(d,e.timeStamp)}}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(deco){const q=logical(e),id=decoHit(q);if(id){const p=placeOf(id);drag={id,ox:q.x-p.x,oy:q.y-p.y}}}});
 cv.addEventListener('pointermove',e=>{if(deco&&drag){const q=logical(e),d=DECOR[drag.id];save.place=save.place||{};save.place[drag.id]={x:Math.round(Math.max(0,Math.min(W-d.w,q.x-drag.ox))),y:Math.round(Math.max(d.y0,Math.min(d.y1,q.y-drag.oy)))};return}
   const p=ptr[e.pointerId];if(!p||p.done||scene!=='knit')return;const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.hypot(dx,dy)>=14){p.done=true;const L=Math.hypot(dx,dy);padTouch.dx=dx/L;padTouch.dy=dy/L;padTouch.t=performance.now();input(classify(dx,dy),e.timeStamp,false,{dx,dy})}});
@@ -1583,9 +1587,9 @@ $('xClose').addEventListener('click',closeX);
 function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`편지 ${un}`:'편지';if($('tMail').textContent!==t)$('tMail').textContent=t;
   const d=!owned('yard'),s=!owned('studio');if($('tDye').hidden!==d)$('tDye').hidden=d;if($('tStudio').hidden!==s)$('tStudio').hidden=s}
 
-if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
+if(globalThis.__HANKO_TEST__)globalThis.__hanko={pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af5309b';
+const BUILD='6af53476';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
