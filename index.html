@@ -39,7 +39,7 @@ body{height:100%;margin:0;background:#6a4a4f;color:var(--ink);font-family:var(--
 .btn:focus-visible,.pbtn:focus-visible,.seg button:focus-visible{outline:var(--u) dashed var(--pink);outline-offset:var(--u)}
 .panel{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,10,15,.5);z-index:2}
 .box{background:var(--paper);border:var(--u) solid var(--ink);border-radius:calc(var(--u)*8);box-shadow:0 calc(var(--u)*3) 0 rgba(91,58,51,.45);padding:calc(var(--u)*6) calc(var(--u)*8);display:grid;gap:calc(var(--u)*4);max-width:calc(var(--u)*290);max-height:calc(var(--u)*166);overflow:auto;box-sizing:border-box;
-  }
+  background-image:radial-gradient(#e8d3c3 calc(var(--u)*.6),transparent calc(var(--u)*.6));background-size:calc(var(--u)*8) calc(var(--u)*8)}
 .box h1{font-weight:700;font-size:calc(var(--fs)*2);margin:0;line-height:1.1;color:#b85c72}
 .box h2{font-weight:700;font-size:calc(var(--fs)*1.33);margin:0}
 .box p{margin:0}
@@ -180,6 +180,13 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
 .seg{clip-path:none;background:none!important;padding:0!important;gap:max(6px,calc(var(--u)*3))!important}
 #pauseBtn{border-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAyUlEQVR4XmPUklL4z0ABYAHpPbbOgWHHmjMMHiEmYKNA7EXbPqAYG+clgCIPUmsVdABiALrmw6cZGBRFBVAMAIkxMEAsAWGQHhBgBHkB5AKYQdPWvcLroawgMbhL4C5A1qwrK4bXAIgFCO/CvQBxInEA5h0QYAIR6AFGDIDpARtACRgkBoASCakApgfsBVDCsDUl3giQWliqBUcjzBBQ/JKSkEAAJSlDTD2DM00g2wxLynAvwARg3rn/+gMKRtcM8wI4LxDve0wAAClsYxmVCxT7AAAAAElFTkSuQmCC") 6 fill / var(--bw) stretch!important}
 #pauseBtn i{background:#f6d890}
+.btn,.tabs button,.seg button{position:relative}
+.btn::after,.tabs button::after,.seg button::after{content:'';position:absolute;inset:calc(var(--bw)*-.6);pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,236,200,.09) 0 1px,transparent 1px 7px),repeating-linear-gradient(0deg,rgba(255,236,200,.09) 0 1px,transparent 1px 7px)}
+.btn:disabled::after{opacity:.5}
+.row{gap:max(16px,calc(var(--u)*8))!important}.tools{gap:max(14px,calc(var(--u)*7))!important}.tabs{gap:max(10px,calc(var(--u)*5))!important}.seg{gap:max(10px,calc(var(--u)*5))!important}
+.hud{top:max(6px,calc(var(--u)*4))}
+.hud .grp{padding:0 max(14px,calc(var(--u)*7))!important;gap:max(12px,calc(var(--u)*6))!important;min-height:max(36px,calc(var(--u)*17))!important;font-size:max(13px,var(--fs))}
 .row{gap:max(12px,calc(var(--u)*6))}.tools{gap:max(10px,calc(var(--u)*5))}.tabs{gap:max(8px,calc(var(--u)*4))}
 </style>
 
@@ -637,7 +644,7 @@ function drawShop(pn){
   for(const [gx,gy,r] of [[92,82,90],[160,8,46]]){for(let k=r;k>0;k-=6){x.fillStyle='rgba(255,176,130,.05)';x.beginPath();x.arc(gx,gy,k,0,7);x.fill()}}
   if(deco){pill('가구를 끌어서 원하는 자리에 놓아요',160,20,C.gold);for(const id in DECOR){if(!decoOwned(id))continue;const d=DECOR[id],p=placeOf(id),on=drag&&drag.id===id;
       x.fillStyle=on?C.gold:C.cream;for(let i=0;i<d.w;i+=4){x.fillRect(p.x+i,p.y-1,2,1);x.fillRect(p.x+i,p.y+d.h,2,1)}for(let j=0;j<d.h;j+=4){x.fillRect(p.x-1,p.y+j,1,2);x.fillRect(p.x+d.w,p.y+j,1,2)}}}
-  else if(fc&&fc.state==='wait'&&scene==='shop'&&!anyPanel())pill(fc.name?`${fc.name}을 눌러 주문 받기`.replace('니을','니를').replace('지을','지를').replace('피을','피를').replace('루을','루를'):'손님을 눌러 주문 받기',160,22,C.cream);
+  else if(fc&&fc.state==='wait'&&scene==='shop'&&!anyPanel())softLabel(fc.name?`${fc.name}을 눌러 주문 받기`.replace('니을','니를').replace('지을','지를').replace('피을','피를').replace('루을','루를'):'손님을 눌러 주문 받기',160,24);
   drawToast(pn);
 }
 const iconCache=new Map();
@@ -1255,10 +1262,10 @@ function drawToast(pn){if(scene!=='shop'||anyPanel())return;
   if(shop.toastCur){const k=(pn-shop.toastCur.t)/2600;softLabel(shop.toastCur.text,160,48,k<.08?k/.08:k>.88?(1-k)/.12:1)}}
 /* a notice with no box: cream text over a soft dark blur, like a shadow behind it */
 function softLabel(text,cx,y,alpha=1){const x=ctx;x.save();x.font='12px Galmuri11';const w=Math.ceil(x.measureText(text).width),h=14,l=Math.round(Math.max(8-OX,Math.min(W+OX-8-w,cx-w/2)));
-  x.globalAlpha=alpha;x.fillStyle='#000';x.shadowColor='rgba(16,6,10,.8)';x.shadowBlur=6;x.shadowOffsetX=2000;
-  for(let i=0;i<2;i++){x.fillRect(l-3-2000,y,w+6,h);x.fillRect(l-1-2000,y-2,w+2,h+4)}
+  x.globalAlpha=alpha;x.fillStyle='#000';x.shadowColor='rgba(16,6,10,.14)';x.shadowBlur=7;x.shadowOffsetX=2000;
+  x.fillRect(l-4-2000,y-1,w+8,h+2)
   x.shadowColor='transparent';x.shadowBlur=0;x.shadowOffsetX=0;
-  x.textAlign='left';x.textBaseline='top';x.fillStyle='rgba(20,8,14,.85)';x.fillText(text,l,y+2);x.fillStyle='#fff3dc';x.fillText(text,l,y+1);x.restore()}
+  x.textAlign='left';x.textBaseline='top';x.fillStyle='rgba(20,8,14,.7)';x.fillText(text,l,y+2);x.fillStyle='#fff3dc';x.fillText(text,l,y+1);x.restore()}
 
 /* ---------- the day ---------- */
 function dayCtx(d){const r=srand(d*977+13),sea=season(),pats=myPats();
@@ -1545,7 +1552,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af52619';
+const BUILD='6af5277b';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 refreshTitle();fit();
