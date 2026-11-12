@@ -20,11 +20,11 @@
   --pix:'Galmuri11','DotGothic16',monospace;
   color-scheme:dark;
 }
-html{height:100%;box-sizing:border-box;background:#4e393c}
-body{height:100%;margin:0;background:#4e393c;color:var(--ink);font-family:var(--pix);overflow:hidden;
+html{height:100%;box-sizing:border-box;background:#6a4a4f}
+body{height:100%;margin:0;background:#6a4a4f;color:var(--ink);font-family:var(--pix);overflow:hidden;
     box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 [hidden]{display:none!important}
-#wrap{position:relative;height:100%;display:grid;place-items:center}
+#wrap{position:fixed;inset:0;display:grid}
 #stage{outline:none;position:relative;width:100%;height:100%;font-size:var(--fs);line-height:1.35;--u:2px;--fs:12px;overflow:hidden}
 #cv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}
 .hud{position:absolute;top:calc(var(--u)*3);left:max(calc(var(--u)*5),env(safe-area-inset-left,0px));right:max(calc(var(--u)*5),env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*4);pointer-events:none;color:var(--ink)}
@@ -1069,13 +1069,14 @@ function focusStage(){try{if(document.activeElement&&document.activeElement.blur
    8. Input, scaling, loop
    ========================================================= */
 const stageEl=$('stage');let SCALE_PX=2;
-function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;
+let fitW=0,fitH=0;
+function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;fitW=w;fitH=h;
   if(!w||!h)return;let vw=W,vh=H;if(w/h>=W/H)vw=Math.max(W,Math.round(H*w/h));else vh=Math.max(H,Math.round(W*h/w));
   /* the canvas always matches the screen's shape: extra width is scenery on both sides, extra height is wall above (the note lane stays near the thumbs) */
   if(vw!==VW||vh!==VH){VW=vw;VH=vh;OX=Math.floor((VW-W)/2);OY=VH-H;cv.width=VW;cv.height=VH;ctx.imageSmoothingEnabled=false;BGK=null}
   const f=Math.min(w/VW,h/VH);let s=f;SCALE_PX=s;
   stageEl.style.setProperty('--u',s+'px');stageEl.style.setProperty('--fs',Math.max(10,Math.round(6*s))+'px')}
-addEventListener('resize',fit);
+addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
 const ptr={};
@@ -1099,7 +1100,7 @@ function shopMusic(){if(!st.ac||st.ac.state!=='running')return;const a=st.ac,bt2
     tone(t,hz(ch[b%3]+12),'sine',.035,bt2*.9,.01);if(b%2===0)tone(t+bt2/2,hz(ch[(b+1)%3]+24),'sine',.018,bt2*.5,.01);if(b%4===0)tone(t,hz(ch[0]-12),'triangle',.05,bt2*2,.02);shop.musicT+=bt2}}
 function drawTitle(pn){drawShop(pn);ctx.fillStyle='rgba(29,20,32,.35)';ctx.fillRect(-OX,-OY,VW,VH)}
 function frame(){const pn=performance.now();
-  try{ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=scene==='knit'?C.peach:C.wall;ctx.fillRect(0,0,VW,VH);ctx.setTransform(1,0,0,1,OX,OY);
+  try{const wr=$('wrap');if(wr.clientWidth!==fitW||wr.clientHeight!==fitH)fit();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=scene==='knit'?C.peach:C.wall;ctx.fillRect(0,0,VW,VH);ctx.setTransform(1,0,0,1,OX,OY);
     if(scene==='knit'){const t=st.phase==='idle'?0:pnow();updateKnit(t);drawKnit(st.phase==='idle'?0:now())}
     else{if(scene==='shop'&&!anyPanel()&&!deco)updateShop(pn);if(scene==='shop'&&owned('record'))shopMusic();if(scene==='title')drawTitle(pn);else drawShop(pn)}
     hud()}catch(e){console.error(e)}
