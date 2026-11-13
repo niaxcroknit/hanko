@@ -225,6 +225,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
     <button id="setBtn" type="button" aria-label="설정" hidden><b></b></button>
     <div class="legend" id="legend" hidden></div>
     <div class="tools" id="tools" hidden><button class="btn" id="tStore" type="button">상점</button><button class="btn" id="tBag" type="button">가방</button><button class="btn" id="tDeco" type="button">꾸미기</button><button class="btn" id="tGoal" type="button">목표</button><button class="btn" id="tMail" type="button">편지</button><button class="btn" id="tDye" type="button" hidden>염색</button><button class="btn" id="tStudio" type="button" hidden>작업실</button></div>
+    <div class="tools" id="padBar" hidden><button class="btn main" id="padDone" type="button">다 옮겼어요</button><button class="btn" id="padReset" type="button">처음 자리로</button></div>
     <div class="tools" id="decoBar" hidden><button class="btn main" id="decoDone" type="button">다 했어요</button><button class="btn" id="decoReset" type="button">처음 자리로</button></div>
 
     <div class="panel" id="titleP">
@@ -267,6 +268,7 @@ kbd{font-family:var(--pix);font-size:var(--fs);color:#cdb4a6}
         <p class="sub" id="pauseNote" hidden></p>
         <button class="btn main" id="resumeBtn" type="button">계속 뜨기</button>
         <button class="btn" id="restartBtn" type="button">이 주문 처음부터</button>
+        <button class="btn" id="padMove" type="button">엄지 받침 옮기기</button>
         <button class="btn" id="quitBtn" type="button">그만 뜨고 가게로 나가기</button>
         <button class="btn" id="pauseSet" type="button">설정</button>
         <button class="btn" id="pauseHelp" type="button">게임 방법</button>
@@ -616,13 +618,7 @@ function drawShop(pn){
   for(let a=0;a<16;a++){const ang=a/16*Math.PI*2;x.fillStyle=a%3?C.greenD:C.rose;x.fillRect(Math.round(292+Math.cos(ang)*7),Math.round(60+Math.sin(ang)*7),2,2)}
   heartPx(x,291,58,C.red);
   /* sign */
-  if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2,P=(c,X,Y,w=1,h=1)=>{x.fillStyle=c;x.fillRect(X,Y,w,h)};
-    /* small wooden plank on the door: yarn ball with a needle + heart, drawn in pixels like the rest of the shop */
-    rrect(x,276,29,32,11,C.woodL,glow?C.goldD:C.ink);P(C.wood,278,35,28,1);P(C.wood,278,38,28,1);P(C.gold,278,31);P(C.gold,305,31);P(C.gold,278,37);P(C.gold,305,37);
-    P(C.goldD,288,30);P(C.gold,289,30);P(C.woodD,288,31);P(C.woodD,287,32);
-    P(C.ink,282,32,4,1);P(C.ink,281,33,1,4);P(C.ink,286,33,1,4);P(C.ink,282,37,4,1);P(C.pink,282,33,4,4);P(C.rose,282,33,1,1);P(shade(C.pink,.78),283,35,3,1);P(shade(C.pink,.78),284,34,1,1);
-    P(C.red,295,32,2,1);P(C.red,298,32,2,1);P(C.red,294,33,7,2);P(C.red,295,35,5,1);P(C.red,296,36,3,1);P(C.red,297,37,1,1);P(C.cream,295,33);
-    if(glow){P(C.gold,274,28);P(C.gold,309,28);P(C.gold,274,40);P(C.gold,309,40)}}
+  if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2;x.fillStyle=C.woodD;x.fillRect(278,36,2,5);x.fillRect(302,36,2,5);pill('한코♥',291,21,glow?C.gold:C.cream)}
   /* shelf of round yarn balls */
   for(let r=0;r<3;r++){x.fillStyle=C.woodD;x.fillRect(14,46+r*22,108,4);x.fillStyle=C.woodL;x.fillRect(14,46+r*22,108,1)}
   const ys=yarns();for(let r=0;r<3;r++)for(let i=0;i<9;i++){const col=ys[(i+r*3)%ys.length][0],bx=18+i*11,by=36+r*22,col2=owned('grad')&&i%3===1?ys[(i+r*2+2)%ys.length][0]:null;
@@ -927,7 +923,7 @@ function drawKnit(t){
   x.fillStyle=beatHot?C.gold:C.goldD;for(let y=KY+KNR*2+4;y<LANE-12;y+=3)x.fillRect(J-1,y,2,2);
 
   /* lane */
-  const speed=(owned('metro')?19:15)*4/BT,JR=BPM<=52?15:BPM<=66?13:10,LH=Math.max(24,JR*2+6),LT=LANE-LH/2,PD=TOUCH&&st.phase!=='idle'?PAD():null,LR=PD&&PD.pos==='rb'?PD.x-6:W+OX-4,LL=PD&&PD.pos==='lb'?PD.x+PD.w+6:4-OX;
+  const speed=(owned('metro')?19:15)*4/BT,JR=BPM<=52?15:BPM<=66?13:10,LH=Math.max(24,JR*2+6),LT=LANE-LH/2,PD=(TOUCH||padEdit)&&st.phase!=='idle'?PAD():null,LR=PD&&PD.pos==='rb'?Math.max(J+JR+14,PD.x-6):W+OX-4,LL=PD&&PD.pos==='lb'?Math.min(J-JR-40,PD.x+PD.w+6):4-OX;
   if(st.fever){const k=Math.floor(pn/90)%4;rrect(x,LL-2,LT-2,LR+4-LL,LH+4,C.gold);for(let i=0;i<10;i++){const sx=(i*37+k*9+Math.floor(pn/40))%(LR-LL)+LL;x.fillStyle=i%2?'#fff3b0':C.rose;x.fillRect(sx,LT-4-(i%3)*2,2,2)}}
   rrect(x,LL,LT,LR-LL,LH,st.fever?'#fff0cc':'#f2e2d6');x.fillStyle='#e2ccbc';x.fillRect(LL+2,LT+LH-4,LR-LL-4,2);
   if(st.phase!=='idle'){const b0=Math.floor((t-st.start)/BT)-1;
@@ -1237,7 +1233,10 @@ function fit(){const w=$('wrap').clientWidth,h=$('wrap').clientHeight;fitW=w;fit
 addEventListener('resize',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 /* thumb pad on the right: the swipe can start anywhere, but this gives the thumb a home that is not the judge circle */
 const TOUCH=matchMedia('(pointer:coarse)').matches;
-const PAD=()=>{const S_=SET(),w=Math.round(96*[.8,1,1.2][S_.pad]),pos=S_.padPos||'rb';return{x:pos==='lb'?-OX+8:W+OX-8-w,y:pos==='rm'?Math.max(LANE-12-w-4,26):H-w-3,w,h:w,pos}};
+const PAD=()=>{const S_=SET(),w=Math.round(96*[.8,1,1.2][S_.pad]),pos=S_.padPos||'rb';
+  if(pos==='free'&&S_.padF){const x=Math.max(-OX+2,Math.min(W+OX-2-w,S_.padF[0]*VW-OX-w/2)),y=Math.max(-OY+2,Math.min(H-2-w,S_.padF[1]*VH-OY-w/2)),onLane=y+w>LANE-6&&y<LANE+10;
+    return{x,y,w,h:w,pos:onLane?(x+w/2>J?'rb':'lb'):'free'}}
+  return{x:pos==='lb'?-OX+8:W+OX-8-w,y:pos==='rm'?Math.max(LANE-12-w-4,26):H-w-3,w,h:w,pos}};
 const padTouch={x:0,y:0,t:-1e9,dx:0,dy:0};
 function padDirs(){const ins=new Set(P.moves.flatMap(m=>MOVE[m].ins));return{h:ins.has('TL')||ins.has('TR')?['TL','TR']:['L','R'],diag:ins.has('UR')||ins.has('DL')}}
 /* which key a touch on the thumb rest means: nearest of the directions this pattern uses (the very middle is left for swipes) */
@@ -1248,13 +1247,18 @@ function inPad(q){const p=PAD();return q.x>=p.x-6&&q.x<=p.x+p.w+6&&q.y>=p.y-6&&q
 /* first knit on a phone only: a faint finger swipes up then down on the left (left hand = 겉·안), and taps the right rest once */
 const FINGER=sprite(['..ss....','..ss....','..ss....','..ssss..','.sssssss','ssssssss','ssssssss','.ssssss.','..ssss..'],{s:'#fff3e2'});
 function drawHandHint(pn){if(!TOUCH||st.hintT==null)return;const k=(pn-st.hintT)/1000;if(k<0)return;if(k>3.2){st.hintT=null;return}
-  const x=ctx,lx=PAD().pos==='lb'?W+OX-Math.max(34,OX*.45+24):-OX+Math.max(34,OX*.45+24),fade=k<.3?k/.3:k>2.8?(3.2-k)/.4:1;
+  const x=ctx,lx=PAD().x+PAD().w/2<J?W+OX-Math.max(34,OX*.45+24):-OX+Math.max(34,OX*.45+24),fade=k<.3?k/.3:k>2.8?(3.2-k)/.4:1;
   const ph=k%1.4,up=k<1.4,m=Math.min(1,ph/.7),dy=up?-m*16:m*16,y0=up?100:84,a=(ph<.7?1:Math.max(0,1-(ph-.7)/.4))*fade*.6;
   x.save();x.globalAlpha=a;x.drawImage(FINGER,Math.round(lx-5),Math.round(y0+dy));x.fillStyle='#fff3e2';for(let i=1;i<6;i++)x.fillRect(Math.round(lx-1),Math.round(y0+dy+(up?12+i*3:-i*3)),2,1);
   x.globalAlpha=fade*.6;txt(up?'↑ 겉뜨기':'↓ 안뜨기',lx,up?62:118,'#fff3e2','center',12,false,C.ink);
   if(k>2){const p=PAD(),cx=p.x+p.w/2,cy=p.y+p.h/2,r=Math.round(6+((k-2)%0.6)*14);x.globalAlpha=fade*.5;ring(x,Math.round(cx+31),Math.round(cy),r,C.gold,1)}
   x.restore()}
-function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
+let padEdit=false,padDrag=null;
+function startPadEdit(){padEdit=true;$('pauseP').hidden=true;$('padBar').hidden=false}
+function endPadEdit(){padEdit=false;padDrag=null;$('padBar').hidden=true;persist();$('pauseP').hidden=false;$('resumeBtn').focus()}
+$('padMove').addEventListener('click',startPadEdit);$('padDone').addEventListener('click',endPadEdit);
+$('padReset').addEventListener('click',()=>{const S_=SET();S_.padPos='rb';delete S_.padF;persist()});
+function drawPad(pn){if(!(TOUCH||padEdit)||st.phase==='idle')return;const x=ctx,p=PAD(),cx=Math.round(p.x+p.w/2),cy=Math.round(p.y+p.h/2),R=Math.min(p.w,p.h)/2,taps=P.moves.some(m=>MOVE[m].ins.some(d=>d==='TL'||d==='TR'));
   for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const d=Math.hypot(xx+.5,yy+.5);if(d>R)continue;x.fillStyle=d>R-3?'rgba(30,14,20,.12)':'rgba(30,14,20,.2)';x.fillRect(cx+xx,cy+yy,1,1)}
   const now=performance.now(),lit=st.press&&now-st.press.t<140?st.press.dir:null;
   /* rounded triangles pointing outward, leather with a brass edge; the pressed one glows */
@@ -1270,15 +1274,21 @@ function drawPad(pn){if(!TOUCH||st.phase==='idle')return;const x=ctx,p=PAD(),cx=
   tri(cx-e,cy,-1,0,lit==='L'||lit==='TL');tri(cx+e,cy,1,0,lit==='R'||lit==='TR');
   if(taps){x.fillStyle='rgba(246,216,144,.35)';for(let yy=-R+14;yy<R-13;yy+=3)x.fillRect(cx,cy+yy,1,2)}
   if(padDirs().diag){const o=Math.round(e*.62);txt('↗',cx+o,cy-o-7,lit==='UR'?'#ffe0a0':'rgba(246,216,144,.8)','center',12,true,C.ink);txt('↙',cx-o,cy+o-7,lit==='DL'?'#ffe0a0':'rgba(246,216,144,.8)','center',12,true,C.ink)}
-  const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);x.globalAlpha=1}}
+  const k=(pn-padTouch.t)/260;if(k<1){x.globalAlpha=1-k;ring(x,Math.round(padTouch.x),Math.round(padTouch.y),5+Math.round(k*6),C.gold,1);x.globalAlpha=1}
+  if(padEdit){x.fillStyle='rgba(20,10,15,.35)';x.fillRect(-OX,-OY,VW,VH);x.fillStyle=Math.floor(pn/300)%2?C.gold:C.cream;
+    for(let a=0;a<64;a++){const t=a/64*Math.PI*2;if(a%2)continue;x.fillRect(Math.round(cx+Math.cos(t)*(R+2)),Math.round(cy+Math.sin(t)*(R+2)),2,2)}
+    softLabel('엄지 받침을 끌어서 손에 편한 곳에 놓아요',J,hudBottomY()+8)}}
 function logical(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*VW-OX,y:(e.clientY-r.top)/r.height*VH-OY}}
 function classify(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy);if(ax>ay*1.8)return dx<0?'L':'R';if(dy<0)return dx>ay*.45?'UR':'U';return dx<-ay*.45?'DL':'D'}
 const ptr={};
-cv.addEventListener('pointerdown',e=>{ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};if(scene==='knit'){const q=logical(e);Object.assign(padTouch,{x:q.x,y:q.y,t:performance.now(),dx:0,dy:0});const d=padKey(q);if(d){ptr[e.pointerId].done=true;input(d,e.timeStamp)}}try{cv.setPointerCapture(e.pointerId)}catch(_){}
+cv.addEventListener('pointerdown',e=>{if(padEdit){const q=logical(e),p=PAD();if(Math.hypot(q.x-p.x-p.w/2,q.y-p.y-p.h/2)<p.w/2+10){padDrag={ox:q.x-p.x-p.w/2,oy:q.y-p.y-p.h/2};try{cv.setPointerCapture(e.pointerId)}catch(_){}}return}
+  ptr[e.pointerId]={x:e.clientX,y:e.clientY,t:e.timeStamp,done:false};if(scene==='knit'){const q=logical(e);Object.assign(padTouch,{x:q.x,y:q.y,t:performance.now(),dx:0,dy:0});const d=padKey(q);if(d){ptr[e.pointerId].done=true;input(d,e.timeStamp)}}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(deco){const q=logical(e),id=decoHit(q);if(id){const p=placeOf(id);drag={id,ox:q.x-p.x,oy:q.y-p.y}}}});
-cv.addEventListener('pointermove',e=>{if(deco&&drag){const q=logical(e),d=DECOR[drag.id];save.place=save.place||{};save.place[drag.id]={x:Math.round(Math.max(0,Math.min(W-d.w,q.x-drag.ox))),y:Math.round(Math.max(d.y0,Math.min(d.y1,q.y-drag.oy)))};return}
+cv.addEventListener('pointermove',e=>{if(padEdit){if(padDrag){const q=logical(e),S_=SET();S_.padPos='free';S_.padF=[(q.x-padDrag.ox+OX)/VW,(q.y-padDrag.oy+OY)/VH]}return}
+  if(deco&&drag){const q=logical(e),d=DECOR[drag.id];save.place=save.place||{};save.place[drag.id]={x:Math.round(Math.max(0,Math.min(W-d.w,q.x-drag.ox))),y:Math.round(Math.max(d.y0,Math.min(d.y1,q.y-drag.oy)))};return}
   const p=ptr[e.pointerId];if(!p||p.done||scene!=='knit')return;const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.hypot(dx,dy)>=14){p.done=true;const L=Math.hypot(dx,dy);padTouch.dx=dx/L;padTouch.dy=dy/L;padTouch.t=performance.now();input(classify(dx,dy),e.timeStamp,false,{dx,dy})}});
-cv.addEventListener('pointerup',e=>{if(drag){drag=null;persist()}const p=ptr[e.pointerId];delete ptr[e.pointerId];if(!p||p.done||deco)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;
+cv.addEventListener('pointerup',e=>{if(padEdit){padDrag=null;persist();return}
+  if(drag){drag=null;persist()}const p=ptr[e.pointerId];delete ptr[e.pointerId];if(!p||p.done||deco)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;
   if(scene==='knit'){if(Math.hypot(dx,dy)>=8)input(classify(dx,dy),e.timeStamp,false,{dx,dy});else{const q=logical({clientX:p.x,clientY:p.y}),pd=PAD();input(inPad(q)?(q.x<pd.x+pd.w/2?'TL':'TR'):q.x<J?'TL':'TR',p.t)}return}
   if(scene==='shop'&&$('orderP').hidden&&$('helpP').hidden){const q=logical(e),fc=frontCustomer();if(!anyPanel()&&lifeTap(q))return;if(fc&&fc.state==='wait'&&Math.abs(q.x-fc.x)<26&&q.y>88&&q.y<156)openOrder(fc)}});
 cv.addEventListener('pointercancel',e=>delete ptr[e.pointerId]);
@@ -1526,7 +1536,9 @@ function openSettings(from){xBack=from||null;if(from)$(from).hidden=true;initAud
   row('가게 음악',seg([[true,'켜기'],[false,'끄기']],S.music,v=>S.music=v));
   row('속도',seg([[50,'느리게'],[64,'보통'],[80,'빠르게']],BPM,v=>{BPM=v;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.bpm===v)))}));
   row('엄지 받침',seg([[0,'작게'],[1,'보통'],[2,'크게']],S.pad,v=>S.pad=v));
-  row('받침 위치',seg([['rb','오른쪽 아래'],['rm','오른쪽 가운데'],['lb','왼쪽 아래']],S.padPos||'rb',v=>S.padPos=v));
+  row('받침 위치',seg([['rb','오른쪽 아래'],['rm','오른쪽 가운데'],['lb','왼쪽 아래']],S.padPos||'rb',v=>{S.padPos=v;delete S.padF}));
+  if(S.padPos==='free')b.insertAdjacentHTML('beforeend','<p class="sub">지금은 직접 옮긴 자리를 쓰고 있어요.</p>');
+  b.insertAdjacentHTML('beforeend','<p class="sub">원하는 곳에 두려면: 뜨는 중 멈춤 → \'엄지 받침 옮기기\'에서 끌어다 놓아요.</p>');
   row('진동',seg([[true,'켜기'],[false,'끄기']],S.vib,v=>S.vib=v));
   const r=document.createElement('div');r.className='row';r.append(mkBtn('타이밍 맞추기',null,()=>{const back=xBack;$('xP').hidden=true;xBack=null;openCal(back||null)}));b.append(r);
   b.insertAdjacentHTML('beforeend','<p class="sub">소리가 안 들리면: 기기 음량을 올리고 \'소리 확인\'을 눌러 보세요. 아이폰은 옆면 무음 스위치가 켜져 있어도 들리게 해뒀지만, 블루투스 이어폰은 연결을 한 번 확인해 주세요.</p>')})}
@@ -1750,7 +1762,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af66479';
+const BUILD='6af66983';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
