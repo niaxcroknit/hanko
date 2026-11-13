@@ -392,11 +392,14 @@ const PANTS=['#6f7fa8','#8a6a55','#5f7a7f','#8a6a8a'];
 const SKIN=['#ffe0c4','#f6cf9e','#e0a97c','#b9845e'];
 const HATC=['#f5a0b3','#7fd4b8','#ffcb5c','#c4b0ff','#e46a64'];
 const custCache=new Map();
-function custSprites(p){const k=JSON.stringify(p);if(custCache.has(k))return custCache.get(k);
+/* shop proportions: big = taller chibis (about 25px), dy = how far the counter top is lowered */
+const SHOPCFG={big:true,dy:24};
+const BIG={"HEAD": ["......hhhhhhhh......", "....hhhhhhhhhhhh....", "...hhhhhhhhhhhhhh...", "..hhhhhhhhhhhhhhhh..", "..hhhhsssssssshhhh..", "..hhsssssssssssshh..", "..hssssssssssssssh..", "..sseesssssssseess..", "..sseesssssssseess..", "..srrssssssssssrrs..", "...ssssssmmssssss...", "....ssssssssssss....", "......ssssssss......"], "HAT": [".......aaaaaa.......", "....aaaaaaaaaaaa....", "...aaaaaaaaaaaaaa...", "..aAaAaAaAaAaAaAaA.."], "BODY": [".....tttttttttt.....", "....tttttttttttt....", "...tttttttttttttt...", "..stttttttttttttts..", "..stttttttttttttts..", "...tttttttttttttt...", "...tttttttttttttt..."], "SCARF": [".....ffffffffff.....", "....ffffffffffff....", "...ttttttffttttttt.."], "LEGS": [[".....ppp....ppp.....", ".....ppp....ppp.....", "....oooo....oooo...."], ["....ppp......ppp....", "....ppp......ppp....", "...oooo......oooo..."]], "WITCH": ["............bb......", "...........bbb......", "..........bbbb......", ".........bBbbb......", "........bbbbbb......", ".......bbbbbbbb.....", "......bbbbbbbbbb....", ".....bPPPPYPPPPPb...", "bbbbbbbbbbbbbbbbbbbb", "..hhhhhhhhhhhhhhhh..", ".hhhsssssssssssshhh.", ".hhssssssssssssssh..", ".hsseesssssssseessh.", ".hsseesssssssseessh.", ".hsrrssssssssssrrsh.", ".hhssssssmmsssssshh.", ".hh.ssssssssssss.hh.", ".h....ssssssss....h.", "....kkkkwwwwkkkk....", "...kkkkkkkkkkkokk...", "..kkwkkkkKkkkkkkkk..", ".kkkkkkkkkkkkwkkkkk.", ".kokkkkwkkkkkkkkkok.", ".kkkkkkkkkkkokkkkkk."]};
+function custSprites(p){const k=JSON.stringify(p)+SHOPCFG.big;if(custCache.has(k))return custCache.get(k);
   const map={h:p.hair,s:p.skin,e:C.ink,r:'#f7a2a2',m:'#d9777a',t:p.shirt,p:p.pants,o:C.woodD,a:p.hat,A:p.hat&&shade(p.hat,.8),f:p.scarf};
   if(p.hat)map.p=p.pants;
-  const head=p.hat?[...HAT,...HEAD.slice(2)]:HEAD,body=p.scarf?SCARF:BODY;
-  const fr=LEGS.map(l=>{const rows=[...head,...body,...l];return sprite(rows,{...map,c:C.cream})});custCache.set(k,fr);return fr}
+  const big=SHOPCFG.big,head=big?(p.hat?[...BIG.HAT,...BIG.HEAD.slice(4)]:BIG.HEAD):(p.hat?[...HAT,...HEAD.slice(2)]:HEAD),body=big?(p.scarf?[...BIG.SCARF,...BIG.BODY.slice(3)]:BIG.BODY):(p.scarf?SCARF:BODY);
+  const fr=(big?BIG.LEGS:LEGS).map(l=>{const rows=[...head,...body,...l];return sprite(rows,{...map,c:C.cream})});custCache.set(k,fr);return fr}
 /* the owner: a witch in a black pointed hat and black dress, with her cat's hair stuck all over it */
 const KNIT_ROWS=[
  '..........bb....','.........bbb....','.......bbbb.....','......bBbbbb....','.....bbbbbbbb...','....bPPPYPPPPb..','bbbbbbbbbbbbbbbb',
@@ -615,8 +618,8 @@ function drawShop(pn){
   /* sign */
   if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2;x.fillStyle=C.woodD;x.fillRect(278,36,2,5);x.fillRect(302,36,2,5);pill('한코♥',291,21,glow?C.gold:C.cream)}
   /* shelf of round yarn balls */
-  x.fillStyle=C.woodD;x.fillRect(14,46,108,4);x.fillRect(14,76,108,4);x.fillStyle=C.woodL;x.fillRect(14,46,108,1);x.fillRect(14,76,108,1);
-  const ys=yarns();for(let r=0;r<2;r++)for(let i=0;i<9;i++){const col=ys[(i+r*2)%ys.length][0],bx=18+i*11,by=36+r*30,col2=owned('grad')&&i%3===1?ys[(i+r*2+2)%ys.length][0]:null;
+  for(let r=0;r<3;r++){x.fillStyle=C.woodD;x.fillRect(14,46+r*22,108,4);x.fillStyle=C.woodL;x.fillRect(14,46+r*22,108,1)}
+  const ys=yarns();for(let r=0;r<3;r++)for(let i=0;i<9;i++){const col=ys[(i+r*3)%ys.length][0],bx=18+i*11,by=36+r*22,col2=owned('grad')&&i%3===1?ys[(i+r*2+2)%ys.length][0]:null;
     x.fillStyle=C.ink;x.fillRect(bx+2,by-1,6,1);x.fillRect(bx,by+1,1,6);x.fillRect(bx+9,by+1,1,6);x.fillRect(bx+2,by+9,6,1);x.fillRect(bx+1,by,1,1);x.fillRect(bx+8,by,1,1);x.fillRect(bx+1,by+8,1,1);x.fillRect(bx+8,by+8,1,1);
     x.fillStyle=col;x.fillRect(bx+1,by+1,8,7);x.fillRect(bx+2,by,6,9);if(col2){x.fillStyle=col2;x.fillRect(bx+5,by+1,4,7);x.fillRect(bx+5,by,3,9)}x.fillStyle=shade(col,1.25);x.fillRect(bx+2,by+2,2,2);x.fillStyle=shade(col,.82);x.fillRect(bx+3,by+5,5,1);x.fillRect(bx+2,by+7,5,1)}
   /* framed finished pieces */
@@ -633,17 +636,18 @@ function drawShop(pn){
     x.fillStyle=C.woodD;x.fillRect(207,118,26,3);
     for(let k=26;k>0;k-=6){x.fillStyle='rgba(255,150,70,.05)';x.beginPath();x.arc(220,112,k+20,0,7);x.fill()}}
   /* knitter behind the counter */
-  const kb=Math.floor(pn/220)%2;x.drawImage(knitterFor(),74,70);
+  const DY=SHOPCFG.dy,CH=42-DY;x.save();x.translate(0,DY);
+  const kb=Math.floor(pn/220)%2;x.drawImage(knitterFor(),SHOPCFG.big?72:74,SHOPCFG.big?68:70);
   x.fillStyle=C.pink;x.fillRect(79,88,10,5);x.fillStyle=shade(C.pink,.8);x.fillRect(79,90,10,1);
   x.fillStyle=C.woodL;x.fillRect(73+kb,87,14,1);x.fillRect(80-kb,89,14,1);
   /* counter: rounded top, heart panels */
-  rrect(x,20,92,140,7,C.woodL);x.fillStyle=C.wood;x.fillRect(24,99,132,42);x.fillStyle=C.ink;x.fillRect(23,99,1,42);x.fillRect(156,99,1,42);
-  for(let i=0;i<4;i++){rrect(x,30+i*32,103,28,32,shade(C.wood,1.08),C.woodD);heartPx(x,42+i*32,116,C.rose)}
-  x.fillStyle='rgba(91,58,51,.25)';x.fillRect(24,141,132,3);
+  rrect(x,20,92,140,7,C.woodL);x.fillStyle=C.wood;x.fillRect(24,99,132,CH);x.fillStyle=C.ink;x.fillRect(23,99,1,CH);x.fillRect(156,99,1,CH);
+  const PH=Math.max(8,32-DY);for(let i=0;i<4;i++){rrect(x,30+i*32,103,28,PH,shade(C.wood,1.08),C.woodD);heartPx(x,42+i*32,103+Math.round(PH/2)-1,C.rose)}
+  x.fillStyle='rgba(91,58,51,.25)';x.fillRect(24,141-DY,132,3);
   /* yarn basket and a steaming mug */
   rrect(x,118,84,24,10,C.woodL,C.woodD);x.fillStyle=C.woodD;for(let i=0;i<5;i++)x.fillRect(121+i*4,86,1,6);
   x.fillStyle=C.lilac;x.fillRect(123,79,7,6);x.fillStyle=C.mint;x.fillRect(130,80,7,5);x.fillStyle=C.rose;x.fillRect(127,77,5,4);
-  x.drawImage(MUG,100,84);const sp=Math.floor(pn/300)%3;x.fillStyle='rgba(255,255,255,.8)';x.fillRect(102+sp%2,80-sp,1,2);x.fillRect(104-(sp%2),78-sp,1,2);
+  x.drawImage(MUG,100,84);const sp=Math.floor(pn/300)%3;x.fillStyle='rgba(255,255,255,.8)';x.fillRect(102+sp%2,80-sp,1,2);x.fillRect(104-(sp%2),78-sp,1,2);x.restore();
   /* rocking chair */
   if(owned('rocking'))inPlace(x,'rocking',()=>{const rk=Math.round(Math.sin(pn/700)*1.5);x.fillStyle=C.ink;x.fillRect(40+rk,130,3,22);x.fillRect(40+rk,142,16,3);x.fillRect(54+rk,142,2,10);x.fillRect(38,152,22,2);
     x.fillStyle=C.woodL;x.fillRect(41+rk,131,1,20);x.fillRect(41+rk,143,14,1);x.fillStyle=C.lilac;x.fillRect(43+rk,136,10,6);x.fillStyle=shade(C.lilac,1.2);x.fillRect(44+rk,137,8,1)});
@@ -657,22 +661,24 @@ function drawShop(pn){
   });
 
   /* counter-top extras */
+  x.save();x.translate(0,SHOPCFG.dy);
   if(owned('record')){rrect(x,26,84,22,9,C.woodL,C.ink);x.fillStyle='#2a1a20';x.fillRect(29,82,14,4);x.fillStyle=Math.floor(pn/200)%2?C.rose:'#4a2a30';x.fillRect(35,83,2,2);
     const nt=(pn/1500)%1;x.globalAlpha=1-nt;x.fillStyle=C.cream;x.fillRect(46,Math.round(80-nt*14),1,4);x.fillRect(46,Math.round(80-nt*14),3,1);x.fillRect(49,Math.round(82-nt*14),1,3);x.globalAlpha=1}
   if(owned('cookie')){x.fillStyle=C.ink;x.fillRect(52,90,16,3);x.fillStyle=C.cream;x.fillRect(53,90,14,2);for(let i=0;i<3;i++){x.fillStyle='#c98a52';x.fillRect(54+i*4,86,4,4);x.fillStyle='#6b3d22';x.fillRect(55+i*4,87,1,1)}}
   if(owned('metro')){const sw=Math.round(Math.sin(pn/300)*2);x.fillStyle=C.ink;x.fillRect(109,80,7,12);x.fillStyle=C.woodL;x.fillRect(110,81,5,11);x.fillStyle=C.ink;x.fillRect(112+sw,78,1,8)}
   if(owned('piggy')){x.fillStyle=C.ink;x.fillRect(143,84,13,8);x.fillStyle=C.pink;x.fillRect(144,85,11,6);x.fillStyle=C.ink;x.fillRect(146,86,1,1);x.fillRect(152,84,2,1);x.fillStyle=shade(C.pink,.8);x.fillRect(144,89,2,2)}
+  x.restore();
   drawCrafted(x,pn);drawShopLife(x,pn);
   /* customers */
   const sorted=shop.custs.slice().sort((a,b)=>a.x-b.x);
   for(const c of sorted){const fr=custSprites(c.pal),f=c.walking?Math.floor(pn/160+c.bob)%2:0,hop=c.mood==='happy'?Math.max(0,Math.sin((pn-c.moodT)/90))*3:Math.round(Math.sin(pn/500+c.bob)*.6+.4);
-    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-7,145,15,2);x.drawImage(fr[f],Math.round(c.x)-9,128-hop);custDeco(x,c,pn)}
+    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-Math.floor(fr[f].width/2)+2,145,fr[f].width-4,2);x.drawImage(fr[f],Math.round(c.x)-Math.floor(fr[f].width/2),146-fr[f].height+2-hop);custDeco(x,c,pn)}
   drawBlackout(x,pn);
   /* order bubble */
   const fc=frontCustomer();
   if(fc&&fc.state==='wait'&&scene==='shop'&&!deco)drawBubble(x,fc,pn);
   /* mood bubbles */
-  for(const c of shop.custs){if(!c.mood)continue;const t=(pn-c.moodT)/1000;if(t>2.4)continue;const bx=Math.round(c.x)-5,by=106-t*8;
+  for(const c of shop.custs){if(!c.mood)continue;const t=(pn-c.moodT)/1000;if(t>2.4)continue;const bx=Math.round(c.x)-5,by=(SHOPCFG.big?98:106)-t*8;
     if(c.mood==='happy'){x.drawImage(HEART,bx,by);if(t>.2)x.drawImage(HEART,bx+9,by+5);if(t>.4)x.drawImage(HEART,bx-7,by+7)}else x.drawImage(SWEAT,bx+8,by+8)}
   /* coins */
   shop.coinsFx=shop.coinsFx.filter(f=>pn-f.t<900);
@@ -1187,8 +1193,8 @@ $('playBtn').addEventListener('click',()=>{if(matchMedia('(pointer:coarse)').mat
 $('quickGo').addEventListener('click',()=>{save.tutSeen=1;persist();$('quickP').hidden=true;startDay()});
 $('quickMore').addEventListener('click',()=>openHelp('quickP'));
 function drawQuick(){const pic=(id,w,h,fn)=>{const c=$(id);c.width=w;c.height=h;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.fillStyle='#6a4a4f';x.fillRect(0,0,w,h);fn(x)};
-  pic('q1',40,34,x=>{x.fillStyle=C.ink;x.fillRect(9,1,22,14);x.fillStyle='#fff7ea';x.fillRect(10,2,20,12);x.fillStyle=C.ink;x.fillRect(19,15,3,1);x.fillRect(20,16,1,1);
-    x.drawImage(iconFor('heart','#ef8aa0'),0,0,16,16,12,3,10,10);heartPx(x,24,5,C.red);const fr=custSprites({hair:'#5a3a2a',shirt:'#94c3ea',pants:'#6f7fa8',skin:'#ffe0c4',hat:'#f5a0b3',scarf:null})[0];x.drawImage(fr,11,17)});
+  pic('q1',40,42,x=>{x.fillStyle=C.ink;x.fillRect(9,1,22,14);x.fillStyle='#fff7ea';x.fillRect(10,2,20,12);x.fillStyle=C.ink;x.fillRect(19,15,3,1);x.fillRect(20,16,1,1);
+    x.drawImage(iconFor('heart','#ef8aa0'),0,0,16,16,12,3,10,10);heartPx(x,24,5,C.red);const fr=custSprites({hair:'#5a3a2a',shirt:'#94c3ea',pants:'#6f7fa8',skin:'#ffe0c4',hat:'#f5a0b3',scarf:null})[0];x.drawImage(fr,Math.round(20-fr.width/2),42-fr.height)});
   pic('q2',40,34,x=>{x.fillStyle='#f2e2d6';x.fillRect(0,12,40,12);ring(x,30,18,6,'#f5a0b3',1);x.drawImage(noteSprite({kind:'K',dir:'U'}),2,11);x.drawImage(noteSprite({kind:'P',dir:'D'}),15,11);
     x.fillStyle='#fff3e2';x.fillRect(8,2,2,7);x.fillRect(7,3,4,1);x.fillRect(6,4,1,1);x.fillRect(11,4,1,1);x.fillRect(21,26,2,7);x.fillRect(20,31,4,1);x.fillRect(19,30,1,1);x.fillRect(24,30,1,1)});
   pic('q3',40,34,x=>{x.drawImage(COIN,6,12);x.drawImage(COIN,12,15);const b=sprite(['..cccc..','.cCccCc.','cccCcccc','cCcccCcc','.cccCcc.','..cccc..'],{c:'#f5a0b3',C:'#d9788f'});x.drawImage(b,21,11);x.drawImage(HEART,16,3)})}
@@ -1451,10 +1457,10 @@ function drawShopLife(x,pn){const T=save.today;if(!T||scene==='title')return;ens
     for(let i=0;i<6;i++){x.fillStyle=(i+Math.floor(pn/400))%2?C.red:C.gold;x.fillRect(tx-6+((i*5)%13),ty+3+i*3,1,1)}}
   save.ribbons.slice(-5).forEach((rb,i)=>{const rx=128+i*9,ry=72,col=rb.r==='금'?C.gold:rb.r==='은'?'#cfd6e6':'#d69a6a';x.fillStyle=C.ink;x.fillRect(rx,ry,7,7);x.fillStyle=col;x.fillRect(rx+1,ry+1,5,5);x.fillStyle=C.rose;x.fillRect(rx+1,ry+7,2,4);x.fillRect(rx+4,ry+7,2,4)});
   const B=save.blanket,pcs=B.pieces.length?B.pieces:(B.last||[]);
-  if(pcs.length){const bx=106,by=100;x.fillStyle=C.ink;x.fillRect(bx-1,by-1,41,32);
-    for(let k=0;k<9;k++){const p=pcs[k],cx2=bx+(k%3)*13,cy2=by+Math.floor(k/3)*10;
-      if(p&&PAT[p.k])x.drawImage(iconFor(p.k,p.yarn),0,0,16,16,cx2,cy2,13,10);else{x.fillStyle=shade(C.wood,1.15);x.fillRect(cx2,cy2,13,10);x.fillStyle=C.woodD;x.fillRect(cx2+5,cy2+4,3,2)}}
-    x.fillStyle=C.cream;for(let i=0;i<39;i+=3)x.fillRect(bx+i,by+30,2,2)}
+  if(pcs.length){const cw=SHOPCFG.dy>12?10:13,chh=SHOPCFG.dy>12?5:10,bx=110,by=100+SHOPCFG.dy;x.fillStyle=C.ink;x.fillRect(bx-1,by-1,cw*3+2,chh*3+2);
+    for(let k=0;k<9;k++){const p=pcs[k],cx2=bx+(k%3)*cw,cy2=by+Math.floor(k/3)*chh;
+      if(p&&PAT[p.k])x.drawImage(iconFor(p.k,p.yarn),0,0,16,16,cx2,cy2,cw,chh);else{x.fillStyle=shade(C.wood,1.15);x.fillRect(cx2,cy2,cw,chh);x.fillStyle=C.woodD;x.fillRect(cx2+cw/2-1,cy2+chh/2-1,2,1)}}
+    x.fillStyle=C.cream;for(let i=0;i<cw*3;i+=3)x.fillRect(bx+i,by+chh*3,2,1)}
   save.cats.forEach((c,i)=>{const sp=CAT_SPOTS[i];if(!sp)return;const br=Math.floor(pn/900+i)%2;x.drawImage(catSprite(c.color),sp[0],sp[1]-br)});
   if(T.tangle&&!T.tg.done){const k=T.tg.taps,sh=shop.tgT&&pn-shop.tgT<200?Math.round(Math.sin(pn/20)*2):0;drawYarnBall(x,TG.x+sh,TG.y,7-Math.floor(k/3),C.rose,k,pn)}
   if(T.stray&&!T.strayDone&&save.cats.length<4){x.drawImage(catSprite(T.strayCol||(T.strayCol=rnd(CAT_COLORS)[0])),SC.x,SC.y);if(Math.floor(pn/600)%2)heartPx(x,SC.x+4,SC.y-6,C.rose)}}
@@ -1471,7 +1477,7 @@ function drawYarnBall(x,cx,cy,r,col,k,pn){const dk=shade(col,.72),lt=shade(col,1
   if(!k&&Math.floor(pn/500)%2){x.fillStyle=C.gold;x.fillRect(cx-1,cy-r-8,2,4);x.fillRect(cx-1,cy-r-3,2,1)}
   if(k){x.fillStyle=C.cream;for(let i=0;i<8;i++){x.fillStyle=i<k?C.gold:'rgba(242,226,214,.5)';x.fillRect(cx-8+i*2,cy-r-5,1,2)}}}
 /* order bubble: soft rounded cloud with a little tail, the wanted swatch in a frame, a yarn ball of the colour and a coin */
-function drawBubble(x,c,pn){const w=40,h=26,bx=Math.round(c.x)-w/2,by=Math.round(90+Math.sin(pn/420)*1.2),edge=c.golden?C.goldD:C.ink,paper=c.golden?'#fff3cc':'#fff7ea';
+function drawBubble(x,c,pn){const w=40,h=26,bx=Math.round(c.x)-w/2,by=Math.round((SHOPCFG.big?92:90)-(SHOPCFG.big?10:0)+Math.sin(pn/420)*1.2),edge=c.golden?C.goldD:C.ink,paper=c.golden?'#fff3cc':'#fff7ea';
   x.fillStyle='rgba(30,14,20,.28)';x.fillRect(bx+3,by+h+1,w-4,2);
   const shape=(o,col)=>{x.fillStyle=col;x.fillRect(bx+3-o,by-o,w-6+2*o,h+2*o);x.fillRect(bx+1-o,by+1-o,w-2+2*o,h-2+2*o);x.fillRect(bx-o,by+3-o,w+2*o,h-6+2*o)};
   shape(1,edge);shape(0,paper);x.fillStyle=c.golden?'#f2dca0':'#efe0cc';x.fillRect(bx+2,by+h-2,w-4,1);x.fillRect(bx+1,by+h-3,1,1);x.fillRect(bx+w-2,by+h-3,1,1);
@@ -1487,7 +1493,7 @@ function drawBlackout(x,pn){const T=save.today;if(!T||!T.blackout||scene==='titl
   for(let k=64;k>0;k-=8){x.fillStyle='rgba(255,190,110,.06)';x.beginPath();x.arc(73,84,k,0,7);x.fill()}}
 function custDeco(x,c,pn){const cx2=Math.round(c.x);
   if(c.golden&&Math.floor(pn/220)%2){x.fillStyle=C.gold;x.fillRect(cx2-9,128,2,2);x.fillRect(cx2+8,133,2,2);x.fillRect(cx2+6,123,1,1);x.fillRect(cx2-6,121,1,1)}
-  if(c.reg)heartPx(x,cx2-1,122,C.rose)}
+  if(c.reg)heartPx(x,cx2-1,SHOPCFG.big?115:122,C.rose)}
 function lifeTap(q){const T=save.today;if(!T)return false;
   if(T.tangle&&!T.tg.done&&Math.hypot(q.x-TG.x,q.y-TG.y)<13){T.tg.taps++;shop.tgT=performance.now();initAudio();tone(st.ac.currentTime,hz(74+T.tg.taps*2),'square',.04,.06,.002);
     if(T.tg.taps>=8){T.tg.done=true;save.coins+=15;coinSfx(3);toast('엉킨 실뭉치를 다 풀었어요! +15코인');T.log.events.push('엉킨 실뭉치를 끝까지 풀었다.');ev('tangle',1);persist()}return true}
@@ -1550,7 +1556,7 @@ function postcard(cv,p){cv.width=64;cv.height=44;const x=cv.getContext('2d');x.i
   x.fillStyle=cold?'#a9bde0':sea==='autumn'?'#f2c6a8':'#bfe3f2';x.fillRect(0,0,64,44);x.fillStyle=cold?'#eef0ff':sea==='autumn'?'#d69a3a':'#8fd07a';x.fillRect(0,34,64,10);
   x.fillStyle='rgba(255,255,255,.7)';x.fillRect(6,8,10,3);x.fillRect(8,6,5,2);x.fillStyle='#fff3b0';x.fillRect(46,6,6,6);
   const pal={...p.pal};if(/모자|비니/.test(p.item||''))pal.hat=p.yarn;else pal.scarf=p.yarn;
-  const fr=custSprites(pal)[0];x.drawImage(fr,0,0,fr.width,fr.height,8,6,fr.width*2,fr.height*2);
+  const fr=custSprites(pal)[0];{const z=fr.height>20?1.6:2;x.drawImage(fr,0,0,fr.width,fr.height,8,Math.round(42-fr.height*z),Math.round(fr.width*z),Math.round(fr.height*z))}
   if(PAT[p.pk]){x.fillStyle=C.ink;x.fillRect(49,27,13,13);x.drawImage(iconFor(p.pk,p.yarn),0,0,16,16,50,28,11,11)}
   x.strokeStyle='#fff7ea';x.lineWidth=2;x.strokeRect(1,1,62,42)}
 function openMail(){openX('편지함',null,b=>{const L=ens().letters;
@@ -1591,7 +1597,7 @@ function lifeBag(body,tab){ens();
 function previewSong(pk){initAudio();const a=st.ac,t0=a.currentTime+.05,ch=PAT[pk].chords;for(let i=0;i<8;i++){const c=ch[Math.floor(i/2)%4];tone(t0+i*.22,hz(c[i%3]+12),'square',.03,.2,.005)}}
 
 /* ---------- knitter outfit ---------- */
-function knitterFor(){const o=save.outfit;if(!o)return KNITTER;const k='kn'+o.yarn+o.k;if(iconImg.has(k))return iconImg.get(k);
+function knitterFor(){const o=save.outfit;if(SHOPCFG.big){const k='bigw'+(o?o.yarn:'');if(iconImg.has(k))return iconImg.get(k);const sp=sprite(BIG.WITCH,{...KNIT_MAP,...(o?{k:o.yarn,K:shade(o.yarn,.78)}:{})});iconImg.set(k,sp);return sp}if(!o)return KNITTER;const k='kn'+o.yarn+o.k;if(iconImg.has(k))return iconImg.get(k);
   const s=sprite(KNIT_ROWS,{...KNIT_MAP,k:o.yarn,K:o.k==='stripe'||o.k==='seed'?C.cream:shade(o.yarn,.78)});iconImg.set(k,s);return s}
 
 /* ---------- dye workshop ---------- */
@@ -1673,7 +1679,7 @@ $('xClose').addEventListener('click',closeX);
 /* =========================================================
    10. Yarn scraps and crafting
    ========================================================= */
-const CRAFT={"sc_garland": {"rows": ["w......................w", ".w....................w.", "..ww..cc....cc....cc.w..", "....wcCCc..cCCc..cCCcw..", "......cc....cc....cc...."], "name": "방울 가랜드", "desc": "벽에 거는 털방울 줄", "pos": {"x": 180, "y": 8}}, "sc_coaster": {"rows": [".cccccc.", "cCcCcCcc", "ccccccCc", ".cccccc."], "name": "자투리 컵받침", "desc": "카운터 위 머그 옆에", "pos": {"x": 108, "y": 88}}, "sc_heart": {"rows": ["....w....", "....w....", ".cc.w.cc.", "cCccwcCcc", "ccccccccc", ".ccccccc.", "..ccCcc..", "...ccc...", "....c...."], "name": "하트 모빌", "desc": "천장에 매다는 뜨개 하트", "pos": {"x": 150, "y": 12}}, "sc_star": {"rows": ["....c....", "....c....", "...ccc...", "cccCcCccc", ".ccccccc.", "..ccccc..", ".cc...cc.", "cc.....cc"], "name": "뜨개 별 장식", "desc": "반짝이는 자투리 별", "pos": {"x": 254, "y": 30}}, "sc_cozy": {"rows": ["..g.g...", ".gGgGg..", "..ggg.g.", "cccccccc", "cCcCcCcC", "cccccccc", ".cCcCcc.", ".cccccc."], "name": "화분 뜨개 커버", "desc": "작은 화분에 입힌 니트", "pos": {"x": 232, "y": 62}}, "sc_cushion": {"rows": [".cccccccccc.", "cCccCccCccCc", "cccccccccccc", "cCccCccCccCc", "cccccccccccc", ".cccccccccc."], "name": "패치워크 쿠션", "desc": "바닥에 두는 자투리 쿠션", "pos": {"x": 196, "y": 150}}, "sc_teacozy": {"rows": ["....cc....", "...cCCc...", ".cccccccc.", "cCcCcCcCcC", "cccccccccc", "cCcCcCcCcC", "wwwwwwwwww"], "name": "티코지", "desc": "찻주전자를 덮은 니트", "pos": {"x": 128, "y": 82}}, "sc_bunting": {"rows": ["wwwwwwwwwwwwwwwwwwwwww", ".cccc..cccc..cccc..cc.", "..cC....cC....cC...c..", "...c.....c.....c......"], "name": "삼각 깃발", "desc": "자투리로 뜬 가랜드 깃발", "pos": {"x": 60, "y": 26}}, "sc_pombasket": {"rows": [".c..c.cc.c..", "cCccCcCCccc.", "wwwwwwwwwwww", "wWwWwWwWwWww", "wwwwwwwwwwww", ".wwwwwwwwww."], "name": "털방울 바구니", "desc": "폭신한 털방울 한가득", "pos": {"x": 236, "y": 150}}, "sc_mitten": {"rows": [".ccc..ccc.", "cccccccccc", "cccccccccc", "cCcccccCcc", "cccc.ccccc", ".ww...ww.."], "name": "미니 장갑 장식", "desc": "걸어두는 작은 장갑 한 쌍", "pos": {"x": 262, "y": 58}}, "wd_broom": {"rows": ["...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "..ww..", ".yyyy.", "yyyyyy", "yYyyYy", "yyyyyy", "yYyYyY"], "name": "마녀 빗자루", "desc": "주인장의 비행 도구(드물게)", "pos": {"x": 264, "y": 98}}, "wd_cauldron": {"rows": ["...m...m..m...", "..m.m.m..m....", ".kkkkkkkkkkkk.", "kKKKKKKKKKKKKk", ".kgggGgggGggk.", ".kkkkkkkkkkkk.", "kkkkkkkkkkkkkk", "kkkkkkkkkkkkkk", ".kkkkkkkkkkkk.", "..k........k.."], "name": "작은 가마솥", "desc": "보글보글 초록 물약(드물게)", "pos": {"x": 276, "y": 146}}, "wd_candle": {"rows": ["...f...", "..fF...", "...f...", "..lll..", "..lll..", "..lll..", "..lll..", ".yyyyy.", "yyyyyyy", "..yyy.."], "name": "촛대", "desc": "은은한 촛불(드물게)", "pos": {"x": 66, "y": 80}}, "wd_pumpkin": {"rows": [".....g....", "....g.....", ".oooooooo.", "oOooOOooOo", "oooyooyooo", "oOooOOooOo", "ooyyyyyyoo", ".oooooooo."], "name": "호박 등불", "desc": "웃는 호박 램프(드물게)", "pos": {"x": 160, "y": 106}}, "wd_orb": {"rows": ["..llll..", ".lLllll.", "lLllllll", "llllllll", ".llllll.", "..llll..", ".kkkkkk.", "kkkkkkkk"], "name": "수정 구슬", "desc": "신비한 빛(드물게)", "pos": {"x": 142, "y": 78}}};
+const CRAFT={"sc_garland": {"rows": ["w......................w", ".w....................w.", "..ww..cc....cc....cc.w..", "....wcCCc..cCCc..cCCcw..", "......cc....cc....cc...."], "name": "방울 가랜드", "desc": "벽에 거는 털방울 줄", "pos": {"x": 180, "y": 8}}, "sc_coaster": {"rows": [".cccccc.", "cCcCcCcc", "ccccccCc", ".cccccc."], "name": "자투리 컵받침", "desc": "카운터 위 머그 옆에", "pos": {"x": 112, "y": 112}}, "sc_heart": {"rows": ["....w....", "....w....", ".cc.w.cc.", "cCccwcCcc", "ccccccccc", ".ccccccc.", "..ccCcc..", "...ccc...", "....c...."], "name": "하트 모빌", "desc": "천장에 매다는 뜨개 하트", "pos": {"x": 150, "y": 12}}, "sc_star": {"rows": ["....c....", "....c....", "...ccc...", "cccCcCccc", ".ccccccc.", "..ccccc..", ".cc...cc.", "cc.....cc"], "name": "뜨개 별 장식", "desc": "반짝이는 자투리 별", "pos": {"x": 254, "y": 30}}, "sc_cozy": {"rows": ["..g.g...", ".gGgGg..", "..ggg.g.", "cccccccc", "cCcCcCcC", "cccccccc", ".cCcCcc.", ".cccccc."], "name": "화분 뜨개 커버", "desc": "작은 화분에 입힌 니트", "pos": {"x": 232, "y": 62}}, "sc_cushion": {"rows": [".cccccccccc.", "cCccCccCccCc", "cccccccccccc", "cCccCccCccCc", "cccccccccccc", ".cccccccccc."], "name": "패치워크 쿠션", "desc": "바닥에 두는 자투리 쿠션", "pos": {"x": 200, "y": 150}}, "sc_teacozy": {"rows": ["....cc....", "...cCCc...", ".cccccccc.", "cCcCcCcCcC", "cccccccccc", "cCcCcCcCcC", "wwwwwwwwww"], "name": "티코지", "desc": "찻주전자를 덮은 니트", "pos": {"x": 126, "y": 106}}, "sc_bunting": {"rows": ["wwwwwwwwwwwwwwwwwwwwww", ".cccc..cccc..cccc..cc.", "..cC....cC....cC...c..", "...c.....c.....c......"], "name": "삼각 깃발", "desc": "자투리로 뜬 가랜드 깃발", "pos": {"x": 60, "y": 26}}, "sc_pombasket": {"rows": [".c..c.cc.c..", "cCccCcCCccc.", "wwwwwwwwwwww", "wWwWwWwWwWww", "wwwwwwwwwwww", ".wwwwwwwwww."], "name": "털방울 바구니", "desc": "폭신한 털방울 한가득", "pos": {"x": 236, "y": 150}}, "sc_mitten": {"rows": [".ccc..ccc.", "cccccccccc", "cccccccccc", "cCcccccCcc", "cccc.ccccc", ".ww...ww.."], "name": "미니 장갑 장식", "desc": "걸어두는 작은 장갑 한 쌍", "pos": {"x": 262, "y": 58}}, "wd_broom": {"rows": ["...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "...w..", "..ww..", ".yyyy.", "yyyyyy", "yYyyYy", "yyyyyy", "yYyYyY"], "name": "마녀 빗자루", "desc": "주인장의 비행 도구(드물게)", "pos": {"x": 264, "y": 98}}, "wd_cauldron": {"rows": ["...m...m..m...", "..m.m.m..m....", ".kkkkkkkkkkkk.", "kKKKKKKKKKKKKk", ".kgggGgggGggk.", ".kkkkkkkkkkkk.", "kkkkkkkkkkkkkk", "kkkkkkkkkkkkkk", ".kkkkkkkkkkkk.", "..k........k.."], "name": "작은 가마솥", "desc": "보글보글 초록 물약(드물게)", "pos": {"x": 276, "y": 146}}, "wd_candle": {"rows": ["...f...", "..fF...", "...f...", "..lll..", "..lll..", "..lll..", "..lll..", ".yyyyy.", "yyyyyyy", "..yyy.."], "name": "촛대", "desc": "은은한 촛불(드물게)", "pos": {"x": 66, "y": 104}}, "wd_pumpkin": {"rows": [".....g....", "....g.....", ".oooooooo.", "oOooOOooOo", "oooyooyooo", "oOooOOooOo", "ooyyyyyyoo", ".oooooooo."], "name": "호박 등불", "desc": "웃는 호박 램프(드물게)", "pos": {"x": 160, "y": 106}}, "wd_orb": {"rows": ["..llll..", ".lLllll.", "lLllllll", "llllllll", ".llllll.", "..llll..", ".kkkkkk.", "kkkkkkkk"], "name": "수정 구슬", "desc": "신비한 빛(드물게)", "pos": {"x": 142, "y": 102}}};
 const CRAFT_FIX={w:'#7a5446',W:'#5a3a28',g:'#8fd07a',G:'#5c9c52',y:'#e0b050',Y:'#b8862c',k:'#3a3040',K:'#5a4a60',m:'#c8f0a0',f:'#ff9e4a',F:'#ffd36b',l:'#e8f0ff',L:'#ffffff',o:'#f2a65a',O:'#c97a3a'};
 const DYES_X=[{n:'체리',c:'#c8404a'},{n:'단호박',c:'#e8a040'},{n:'레몬',c:'#f2e070'},{n:'쑥',c:'#8aa86a'},{n:'올리브',c:'#8a8a4a'},{n:'청록',c:'#3a9a94'},
   {n:'바다 유리',c:'#9ad0c8'},{n:'블루베리',c:'#5a6ab0'},{n:'자두',c:'#8a4a7a'},{n:'코코아',c:'#8a5a44'},{n:'모카',c:'#b08a70'},{n:'장미',c:'#d86a8a'},
@@ -1735,9 +1741,9 @@ function craftBag(body){ensCraft();const tot=scrapTotal(),can=tot>=CRAFT_COST.sc
 function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`편지 ${un}`:'편지';if($('tMail').textContent!==t)$('tMail').textContent=t;
   const d=!owned('yard'),s=!owned('studio');if($('tDye').hidden!==d)$('tDye').hidden=d;if($('tStudio').hidden!==s)$('tStudio').hidden=s}
 
-if(globalThis.__HANKO_TEST__)globalThis.__hanko={craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
+if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6af653e7';
+const BUILD='6af66179';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
