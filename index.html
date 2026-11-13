@@ -616,7 +616,13 @@ function drawShop(pn){
   for(let a=0;a<16;a++){const ang=a/16*Math.PI*2;x.fillStyle=a%3?C.greenD:C.rose;x.fillRect(Math.round(292+Math.cos(ang)*7),Math.round(60+Math.sin(ang)*7),2,2)}
   heartPx(x,291,58,C.red);
   /* sign */
-  if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2;x.fillStyle=C.woodD;x.fillRect(278,36,2,5);x.fillRect(302,36,2,5);pill('한코♥',291,21,glow?C.gold:C.cream)}
+  if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2,P=(c,X,Y,w=1,h=1)=>{x.fillStyle=c;x.fillRect(X,Y,w,h)};
+    /* small wooden plank on the door: yarn ball with a needle + heart, drawn in pixels like the rest of the shop */
+    rrect(x,276,29,32,11,C.woodL,glow?C.goldD:C.ink);P(C.wood,278,35,28,1);P(C.wood,278,38,28,1);P(C.gold,278,31);P(C.gold,305,31);P(C.gold,278,37);P(C.gold,305,37);
+    P(C.goldD,288,30);P(C.gold,289,30);P(C.woodD,288,31);P(C.woodD,287,32);
+    P(C.ink,282,32,4,1);P(C.ink,281,33,1,4);P(C.ink,286,33,1,4);P(C.ink,282,37,4,1);P(C.pink,282,33,4,4);P(C.rose,282,33,1,1);P(shade(C.pink,.78),283,35,3,1);P(shade(C.pink,.78),284,34,1,1);
+    P(C.red,295,32,2,1);P(C.red,298,32,2,1);P(C.red,294,33,7,2);P(C.red,295,35,5,1);P(C.red,296,36,3,1);P(C.red,297,37,1,1);P(C.cream,295,33);
+    if(glow){P(C.gold,274,28);P(C.gold,309,28);P(C.gold,274,40);P(C.gold,309,40)}}
   /* shelf of round yarn balls */
   for(let r=0;r<3;r++){x.fillStyle=C.woodD;x.fillRect(14,46+r*22,108,4);x.fillStyle=C.woodL;x.fillRect(14,46+r*22,108,1)}
   const ys=yarns();for(let r=0;r<3;r++)for(let i=0;i<9;i++){const col=ys[(i+r*3)%ys.length][0],bx=18+i*11,by=36+r*22,col2=owned('grad')&&i%3===1?ys[(i+r*2+2)%ys.length][0]:null;
