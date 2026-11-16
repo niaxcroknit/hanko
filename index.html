@@ -758,7 +758,9 @@ function initAudio(){unlockIOS();
   if(!st.ac){st.ac=new (window.AudioContext||window.webkitAudioContext)();
     const len=st.ac.sampleRate*.6,buf=st.ac.createBuffer(1,len,st.ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;st.noise=buf;
     const comp=st.ac.createDynamicsCompressor();const boost=st.ac.createGain();boost.gain.value=1.7;comp.connect(boost).connect(st.ac.destination);st.master=st.ac.createGain();st.master.gain.value=1;st.master.connect(comp);applyVol()}
-  if(st.ac.state!=='running'&&!(scene==='knit'&&st.phase==='paused'))st.ac.resume()}
+  if(st.ac.state!=='running'&&!holdClock())st.ac.resume()}
+/* while the pause menu or a new-technique notice is up, the music clock must stay stopped: a tap must not restart it */
+function holdClock(){return scene==='knit'&&(st.phase==='paused'||st.phase==='intro')}
 function env(g,t,p,d,a=.004){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d)}
 function tone(t,f,type,p,d,a){if(!st.ac)return;const o=st.ac.createOscillator(),g=st.ac.createGain();o.type=type;o.frequency.value=f;env(g,t,p,d,a);o.connect(g).connect(st.master);o.start(t);o.stop(t+d+.05)}
 function kick(t,v=.9){const o=st.ac.createOscillator(),g=st.ac.createGain();o.type='triangle';o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(40,t+.1);env(g,t,v,.16,.002);o.connect(g).connect(st.master);o.start(t);o.stop(t+.2)}
@@ -1580,7 +1582,7 @@ function openBackup(){openX('백업 · 불러오기',null,b=>{persist();const co
   const r3=document.createElement('div');r3.className='row';r3.append(mkBtn('← 설정으로',null,()=>openSettings(xBack)));b.append(r3)})}
 $('setBtn').addEventListener('click',()=>openSettings(scene==='title'?'titleP':null));$('pauseSet').addEventListener('click',()=>openSettings('pauseP'));
 /* phones sometimes suspend audio (calls, lock screen, switching apps): wake it on the next touch */
-for(const ev of ['pointerdown','touchend','keydown'])document.addEventListener(ev,()=>{if(st.ac&&st.ac.state!=='running'&&!(scene==='knit'&&st.phase==='paused')){st.ac.resume();unlockIOS()}},{passive:true,capture:true});
+for(const ev of ['pointerdown','touchend','keydown'])document.addEventListener(ev,()=>{if(st.ac&&st.ac.state!=='running'&&!holdClock()){st.ac.resume();unlockIOS()}},{passive:true,capture:true});
 function pxCanvas(w,h,cls='px'){const c=document.createElement('canvas');c.width=w;c.height=h;c.className=cls;const x=c.getContext('2d');x.imageSmoothingEnabled=false;return[c,x]}
 
 function openAdopt(){const T=save.today,col=T.strayCol||CAT_COLORS[0][0],cname=(CAT_COLORS.find(c=>c[0]===col)||CAT_COLORS[0])[1],names=shuffle(CAT_NAMES).slice(0,3),perk=T.strayPerk||(T.strayPerk=rnd(Object.keys(CAT_PERK)));
