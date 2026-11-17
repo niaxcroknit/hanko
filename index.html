@@ -843,12 +843,18 @@ function input(dir,stamp,key,vec){
 function rowColor(r){if(!order)return undefined;if(P.stripe)return Math.floor(r/2)%2?order.yarn2:undefined;if(order.grad)return mixHex(YARN,order.yarn2,r/(ROWS-1));return undefined}
 const INTRO_MS=1900;
 function introText(n){if(n.introSpecial)return{golden:'황금 실: 맞히면 보너스 코인!',tangle:'엉킨 실: 판정 원 한가운데서 정확히!',wobble:'고양이가 실을 건드렸어요! 흔들려도 박자는 그대로'}[n.introSpecial];const M=MOVE[n.kind];return`새 기법! ${M.name}: ${M.how}`}
-/* the first time a technique or special note shows up, the music holds for a moment so the notice can be read */
-function introPause(t){const due=st.notes.filter(n=>(n.intro||n.introSpecial)&&!n.introDone&&!n.res&&n.t-t<1.8*BT&&n.t-t>0);if(!due.length)return false;
-  const msgs=[];for(const n of st.notes)if((n.intro||n.introSpecial)&&!n.introDone&&n.t-t<5*BT){n.introDone=true;const m=introText(n);if(!msgs.includes(m))msgs.push(m)}
-  st.introMsgs=msgs.slice(0,2);st.introT=performance.now();st.phase='intro';try{st.ac.suspend()}catch(e){}return true}
+/* the first time a technique or special note shows up, the music holds so the notice can be read.
+   New notes that come close together are explained in one stop (two lines per page, page after page),
+   so the music never stops in the middle of a burst and no notice is marked read without being shown */
+function introPause(t){const pend=st.notes.filter(n=>(n.intro||n.introSpecial)&&!n.introDone&&!n.res&&n.t-t>0).sort((a,b)=>a.t-b.t);
+  if(!pend.length||pend[0].t-t>=1.8*BT)return false;
+  const grp=[pend[0]];for(let i=1;i<pend.length;i++){if(pend[i].t-grp[grp.length-1].t<2.8*BT)grp.push(pend[i]);else break}
+  const msgs=[];grp.forEach(n=>{n.introDone=true;const m=introText(n);if(!msgs.includes(m))msgs.push(m)});
+  st.introPages=[];for(let i=0;i<msgs.length;i+=2)st.introPages.push(msgs.slice(i,i+2));
+  st.introMsgs=st.introPages[0];st.introT=performance.now();st.phase='intro';try{st.ac.suspend()}catch(e){}return true}
 function updateKnit(t){
-  if(st.phase==='intro'&&performance.now()-st.introT>INTRO_MS&&!document.hidden){st.phase='play';st.ac.resume()}
+  if(st.phase==='intro'&&!document.hidden){const pages=st.introPages||[st.introMsgs],pg=Math.floor((performance.now()-st.introT)/INTRO_MS);
+    if(pg>=pages.length){st.phase='play';st.ac.resume()}else st.introMsgs=pages[pg]}
   if(st.phase!=='play')return;
   if(introPause(t))return;
   for(const n of st.notes)if(!n.res&&t>n.t+GOOD)judge(n,'miss');
@@ -962,11 +968,12 @@ function drawKnit(t){
   if(st.phase==='play'&&order){softLabel(`${st.score.toLocaleString()}점`,W+OX-40,hudBottomY()+5);
     if(st.fever&&pn-st.feverT<1200)txt('피버 타임!',J,58,C.gold,'center',24,true,C.ink)}
   if(st.phase==='play'){const b=Math.floor((t-st.start)/BT);if(b>=0&&b<LEAD)txt(['준비','시작!'][b],J,70,'#e3869b','center',24,true,C.ink);
-    const intro=lane.filter(n=>n.intro&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD).sort((a,b)=>a.t-b.t)[0];
+    const intro=lane.filter(n=>n.intro&&n.introDone&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD).sort((a,b)=>a.t-b.t)[0];
     if(intro)softLabel(introText(intro),J,100);
-    else{const sp=lane.find(n=>n.introSpecial&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD);if(sp)softLabel(introText(sp),J,100)}}
+    else{const sp=lane.find(n=>n.introSpecial&&n.introDone&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD);if(sp)softLabel(introText(sp),J,100)}}
   if(st.phase==='intro'){x.fillStyle='rgba(20,10,15,.28)';x.fillRect(-OX,-OY,VW,VH);(st.introMsgs||[]).forEach((m,i)=>softLabel(m,J,84+i*18));
-    const k=Math.max(0,1-(performance.now()-st.introT)/INTRO_MS);x.fillStyle='rgba(255,243,220,.7)';x.fillRect(Math.round(J-30),Math.round(80+(st.introMsgs||[]).length*18+4),Math.round(60*k),2)}
+    const el=performance.now()-st.introT,pages=st.introPages||[],k=Math.max(0,1-(el%INTRO_MS)/INTRO_MS);
+    if(pages.length>1)txt(`${Math.min(pages.length,Math.floor(el/INTRO_MS)+1)}/${pages.length}`,J+36,Math.round(80+(st.introMsgs||[]).length*18-1),'#fff3dc','left',11,false);x.fillStyle='rgba(255,243,220,.7)';x.fillRect(Math.round(J-30),Math.round(80+(st.introMsgs||[]).length*18+4),Math.round(60*k),2)}
 }
 
 /* =========================================================
