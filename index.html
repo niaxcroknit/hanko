@@ -599,8 +599,8 @@ const mixHex=(a,b,t)=>{const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),A=
    5. Shop scene
    ========================================================= */
 const cv=$('cv'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
-const COUNTER_X=168,SLOT=24;
-const shop={custs:[],spawned:0,total:3,nextSpawn:0,coinsFx:[],deliver:null,ending:false,toast:null,musicT:0,musicB:0};
+const COUNTER_X=168,SLOT=24,DOOR_X=290,DOOR_Y=122;
+const shop={doorO:0,custs:[],spawned:0,total:3,nextSpawn:0,coinsFx:[],deliver:null,ending:false,toast:null,musicT:0,musicB:0};
 function makeCustomer(){return storyCustomer()||lifeCustomer(shop.spawned)}
 function makeCustomerOld(){
   const pats=['heart',...BOOKS.filter(owned)],newest=save.lastBook&&owned(save.lastBook)?save.lastBook:pats[pats.length-1];
@@ -612,9 +612,15 @@ function startDay(){shop.custs=[];shop.spawned=0;shop.total=custPerDay();shop.ne
 function layoutQueue(){let k=0;for(const c of shop.custs){if(c.state==='leave')continue;c.tx=COUNTER_X+k*SLOT;k++}}
 function frontCustomer(){return shop.custs.find(c=>c.state!=='leave'&&c.state!=='done')}
 function updateShop(pn){
-  if(shop.spawned<shop.total&&pn>shop.nextSpawn&&shop.custs.filter(c=>c.state!=='leave').length<4){shop.custs.push(makeCustomer());shop.spawned++;shop.nextSpawn=pn+1800+Math.random()*1200;bell();layoutQueue()}
-  for(const c of shop.custs){const d=c.tx-c.x;if(Math.abs(d)>.5){c.x+=Math.sign(d)*Math.min(Math.abs(d),c.state==='in'||c.state==='leave'?1.7:.9);c.walking=true}else{c.x=c.tx;c.walking=false;if(c.state==='in')c.state='wait'}}
-  shop.custs=shop.custs.filter(c=>!(c.state==='leave'&&c.x>=W+OX+6));
+  /* customers come in through the door one at a time: the next one waits until the doorway is clear and the door has shut */
+  const doorBusy=shop.custs.some(c=>c.e<1||c.ex!=null);
+  if(shop.spawned<shop.total&&pn>shop.nextSpawn&&!doorBusy&&shop.doorO<.05&&shop.custs.filter(c=>c.state!=='leave').length<4){const nc=makeCustomer();nc.x=nc.tx=DOOR_X;nc.e=0;shop.custs.push(nc);shop.spawned++;shop.nextSpawn=pn+2200+Math.random()*1400;bell();layoutQueue()}
+  for(const c of shop.custs){
+    if(c.e<1){if(shop.doorO>.8)c.e=Math.min(1,c.e+.045);c.walking=true;continue}
+    if(c.ex!=null){if(shop.doorO>.8)c.ex+=.05;c.walking=true;continue}
+    const d=c.tx-c.x;if(Math.abs(d)>.5){c.x+=Math.sign(d)*Math.min(Math.abs(d),c.state==='in'||c.state==='leave'?1.7:.9);c.walking=true}else{c.x=c.tx;c.walking=false;if(c.state==='in')c.state='wait';if(c.state==='leave')c.ex=0}}
+  shop.custs=shop.custs.filter(c=>!(c.ex>=1));
+  const want=shop.custs.some(c=>c.e<1||c.ex!=null);shop.doorO=Math.max(0,Math.min(1,(shop.doorO||0)+(want?.08:-.06)));
   if(!shop.ending&&shop.spawned>=shop.total&&shop.custs.length===0&&scene==='shop'){shop.ending=true;setTimeout(endDay,700)}
 }
 function rrect(x,X,Y,w,h,fill,line){x.fillStyle=line||C.ink;x.fillRect(X+1,Y,w-2,h);x.fillRect(X,Y+1,w,h-2);x.fillStyle=fill;x.fillRect(X+1,Y+1,w-2,h-2);x.fillRect(X+2,Y+1,w-4,h-2)}
@@ -645,6 +651,9 @@ function drawShop(pn){
   rrect(x,272,40,40,82,C.wood);x.fillStyle=C.woodL;x.fillRect(278,48,28,28);x.fillRect(278,84,28,32);x.fillStyle=C.gold;x.fillRect(302,90,3,3);
   for(let a=0;a<16;a++){const ang=a/16*Math.PI*2;x.fillStyle=a%3?C.greenD:C.rose;x.fillRect(Math.round(292+Math.cos(ang)*7),Math.round(60+Math.sin(ang)*7),2,2)}
   heartPx(x,291,58,C.red);
+  {const o=sm(shop.doorO||0);if(o>0){x.fillStyle=C.ink;x.fillRect(273,41,38,80);x.fillStyle=C.sky;x.fillRect(274,42,36,78);x.fillStyle=C.skyL;x.fillRect(274,42,36,30);
+    x.fillStyle='#3a3f5e';x.fillRect(274,100,36,20);x.fillStyle=C.gold;x.fillRect(298,60,3,3);x.fillStyle='rgba(255,203,92,.18)';x.fillRect(292,54,15,15);x.fillStyle='#4a3a3a';x.fillRect(299,63,1,37);
+    const w=Math.max(4,Math.round(36*(1-o)));rrect(x,310-w,40,w+2,82,C.wood);x.fillStyle=C.woodL;if(w>8)x.fillRect(314-w,48,w-8,68);x.fillStyle=C.gold;if(w>6)x.fillRect(312-w,90,2,3)}}
   /* sign */
   if(owned('sign1')||owned('sign2')){const glow=owned('sign2')&&Math.floor(pn/500)%2,P=(c,X,Y,w=1,h=1)=>{x.fillStyle=c;x.fillRect(X,Y,w,h)};
     /* small wooden plank on the door: yarn ball with a needle + heart, drawn in pixels like the rest of the shop */
@@ -708,7 +717,8 @@ function drawShop(pn){
   /* customers */
   const sorted=shop.custs.slice().sort((a,b)=>a.x-b.x);
   for(const c of sorted){const fr=custSprites(c.pal),f=c.walking?Math.floor(pn/160+c.bob)%2:0,hop=c.mood==='happy'?Math.max(0,Math.sin((pn-c.moodT)/90))*3:Math.round(Math.sin(pn/500+c.bob)*.6+.4);
-    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-Math.floor(fr[f].width/2)+2,145,fr[f].width-4,2);x.drawImage(fr[f],Math.round(c.x)-Math.floor(fr[f].width/2),146-fr[f].height+2-hop);custDeco(x,c,pn)}
+    const back=c.e<1?1-c.e:c.ex!=null?Math.min(1,c.ex):0,lift=Math.round(back*(146-DOOR_Y-2));if(c.ex>=.98)continue;
+    x.fillStyle='rgba(91,58,51,.25)';x.fillRect(Math.round(c.x)-Math.floor(fr[f].width/2)+2,145-lift,fr[f].width-4,2);x.drawImage(fr[f],Math.round(c.x)-Math.floor(fr[f].width/2),146-fr[f].height+2-hop-lift);x.save();x.translate(0,-lift);custDeco(x,c,pn);x.restore()}
   drawBlackout(x,pn);
   /* order bubble */
   const fc=frontCustomer();
@@ -1066,8 +1076,8 @@ function give(){
   save.made.unshift({k:order.pk,yarn:YARN,rows:st.fabric.slice(0,-1).map(x=>x.cells.join(''))});save.made=save.made.slice(0,8);lifeGive(r,c);persist();if(c.story)storyAfterGive(r,c);
   c.state='done';c.mood=r.stars>=1?'happy':'sad';c.moodT=performance.now();
   const n=Math.min(8,Math.ceil((r.pay+r.tip)/20));for(let i=0;i<n;i++)shop.coinsFx.push({x:c.x,y:120,t:performance.now()+i*70});coinSfx(n);
-  setTimeout(()=>{c.state='leave';c.tx=W+OX+12;layoutQueue()},900);order=null}
-function reject(){$('orderP').hidden=true;const c=order.c;if(c.story)storyReject(c);c.state='done';c.mood='sad';c.moodT=performance.now();save.served++;persist();setTimeout(()=>{c.state='leave';c.tx=W+OX+12;layoutQueue()},500);order=null}
+  setTimeout(()=>{c.state='leave';c.tx=DOOR_X;layoutQueue()},900);order=null}
+function reject(){$('orderP').hidden=true;const c=order.c;if(c.story)storyReject(c);c.state='done';c.mood='sad';c.moodT=performance.now();save.served++;persist();setTimeout(()=>{c.state='leave';c.tx=DOOR_X;layoutQueue()},500);order=null}
 function endDay(){
   scene='day';let interest=0;if(owned('piggy')){interest=Math.min(50,Math.round(save.earnedToday*.1));save.coins+=interest;persist()}
   storeMode='day';$('nextDay').hidden=false;$('storeClose').hidden=true;
@@ -1841,7 +1851,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`í
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='02d2e5a8';
+const BUILD='3cab9b8a';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
