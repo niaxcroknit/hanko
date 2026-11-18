@@ -513,37 +513,56 @@ const MOVE={
 const KEYNAME={U:'↑/F',D:'↓/J',L:'←/A',R:'→/G',UR:'E',DL:'Z',TL:'D',TR:'K'};
 const R16={A:'x...x...x...x...x.x.x.x.........',B:'xxxxxxxx........',C:'x.x.xxxxxx......',D:'xx.xx.xx.xx.....',E:'x.xxx.xxx.x.....',F:'xxxx.xxxx.......',
   CAB:'xxx.xxxxxx.xx...',W10:'x...x...x...x...x.x.x.x.x.x.....',CH1:'x.x.x.x.x.x.x.x.x.x.x.x.........',CH:'x.xxxxxxxxxx..x.',CH2:'xxx.xxxxxx.xxx..',
-  P1:'xxxxx.xxxxx.....',P2:'x.x.x.x.xxxxxx..',P3:'xx.xx.xx.xx.xx..',Q10:'xxxx.xxx.xxx....'};
+  P1:'xxxxx.xxxxx.....',P2:'x.x.x.x.xxxxxx..',P3:'xx.xx.xx.xx.xx..',Q10:'xxxx.xxx.xxx....',
+  /* 줄무늬 · 행진곡 */M1:'x.x.x.x.x.x.x.x.',M2:'x...x.x.xxx.x.x.',M3:'xxx.x...xxx.x...',M4:'x.xxx.xxx.x.....',M5:'xxxxx...x.x.x...',
+  /* 멍석 · 보사노바 */S1:'x.xx..x.x.xx..x.',S2:'xx..x.x.xx..x.x.',S3:'x..x..x.x.......x..x..x.x.......',S4:'x.x..x.xx.x..x.x',
+  /* 고양이 · 왈츠(3박) */TW:'x.....x.....x.....x.....x.x.x.x.x.x.',T1:'x...x.x.x.x.x...x.x.x.x.',T2:'x.x.x.x...x.x.x.x...x.x.',T3:'xxx.x.....x.xxx.x.....x.',T4:'x.....x.x.x.x.x.x.x.x.x.',
+  /* 꽈배기 · 스윙 재즈 */J1:'x.xxx.xxx.xxx...',J2:'xx.xx.xx.xx.xx..',J3:'x.x.x.xxx.x.xxx.',JC:'xxx.x.xxx.xxx.x.',
+  /* 물결 · 레게 */RW:'..x...x...x...x...x.x.x.x.x.x...',R1:'x.x.xx.xx.x.xxx.',R2:'.xx.x.xx.xx.x.xx',R3:'x.xx..xxx.xx..xx',RC:'.xxxx.xxx.xxx.x.',
+  /* 셰브론 · 칩튠 */E12a:'xxxx.xxxx.xxxx..',E12b:'x.xxxxx.xxxxx.x.',E10a:'xx.xx.xx.xx.xx..',E10b:'x.x.xxxx..x.xxx.',E10c:'xxx.x.xxx.x.xx..'};
+const HARD3={10:['x.xxx.x.xxx.x.x.........','xxx.xxx.....xxx.x.......','x.x.xxx.x.x.xxx.........']};
 const HARD={8:['xx.xxxxxx.......','x.xx.xxx.xx.....','xxx.xxx.xx......','xxxxxxxx........'],10:['xxxxxxxxxx......','xx.xxxx.xxxx....','x.xxx.xxx.xxx...'],
   11:['xxx.xxxxxxxx....'],12:['xxxxxx.xxxxxx...','xx.xxxxxxxxxx...']};
 const chev=['K','SK','K','K','ML','MR','K','K','K2','K'];
 const PAT={
   stripe:{name:'줄무늬',N:8,lv:1,base:70,stripe:true,moves:['K'],items:['줄무늬 양말','줄무늬 비니','줄무늬 목도리'],
     chords:[[62,66,69],[59,62,66],[55,59,62],[57,61,64]],
-    rows:['A','A','B','C','D','E','F','B','D','E','F','B'].map(r=>['KKKKKKKK',r])},
+    sty:'march',rows:['A','M1','M2','M3','M1','M4','M5','M2','M3','M4','M5','M1'].map(r=>['KKKKKKKK',r])},
   seed:{name:'멍석뜨기',N:8,lv:2,base:90,moves:['K','P'],items:['멍석 행주','멍석 쿠션','멍석 파우치'],
     chords:[[57,60,64],[55,59,62],[53,57,60],[55,59,62]],
-    rows:['A','A','B','C','B','D','E','B','F','C','D','B'].map((r,i)=>[i%2?'PKPKPKPK':'KPKPKPKP',r])},
+    sty:'bossa',rows:['S3','S3','S1','S2','S4','S1','S3','S2','S4','S1','S2','S3'].map((r,i)=>[i%2?'PKPKPKPK':'KPKPKPKP',r])},
   cat:{name:'고양이',N:10,lv:2,base:110,moves:['K','P'],items:['고양이 쿠션','고양이 파우치','고양이 담요'],
-    chords:[[60,64,67],[64,67,71],[57,60,64],[53,57,60]],
-    rows:[['KKKKKKKKKK','W10'],['KKKKKKKKKK','P1'],['KKPPPPPPKK','P2'],['KPPPPPPPPK','P3'],['KPPPKKPPPK','Q10'],['KPKPPPPKPK','P1'],
-          ['KPPPPPPPPK','P2'],['KPPPPPPPPK','P3'],['KPPKKKKPPK','Q10'],['KPKKKKKKPK','P1'],['KKKKKKKKKK','P2'],['KKKKKKKKKK','P3']]},
+    chords:[[60,64,67],[62,65,69],[55,59,62],[60,64,67]],sty:'waltz',
+    rows:[['KKKKKKKKKK','TW'],['KKKKKKKKKK','T1'],['KKPPPPPPKK','T2'],['KPPPPPPPPK','T1'],['KPPPKKPPPK','T3'],['KPKPPPPKPK','T4'],
+          ['KPPPPPPPPK','T2'],['KPPPPPPPPK','T1'],['KPPKKKKPPK','T3'],['KPKKKKKKPK','T4'],['KKKKKKKKKK','T2'],['KKKKKKKKKK','T1']]},
   wave:{name:'물결 꽈배기',N:10,lv:3,base:160,moves:['K','P','CF','CB'],items:['물결 꽈배기 스웨터','물결 꽈배기 목도리'],
-    chords:[[57,60,64],[52,55,59],[53,57,60],[55,59,62]],
-    rows:[['PPKKKKKKPP','W10'],['PPKKKKKKPP','P1'],['PPKKKKKKPP','P2'],['PPKKKKKKPP','CAB',{a:2,b:7}],['PPKKKKKKPP','P3'],['PPKKKKKKPP','P1'],
-          ['PPKKKKKKPP','P2'],['PPKKKKKKPP','P3'],['PPKKKKKKPP','P1'],['PPKKKKKKPP','CAB',{a:2,b:7,back:true}],['PPKKKKKKPP','P2'],['PPKKKKKKPP','P1']]},
+    chords:[[57,60,64],[50,53,57],[52,55,59],[57,60,64]],sty:'reggae',
+    rows:[['PPKKKKKKPP','RW'],['PPKKKKKKPP','R1'],['PPKKKKKKPP','R2'],['PPKKKKKKPP','RC',{a:2,b:7}],['PPKKKKKKPP','R3'],['PPKKKKKKPP','R1'],
+          ['PPKKKKKKPP','R2'],['PPKKKKKKPP','R3'],['PPKKKKKKPP','R1'],['PPKKKKKKPP','RC',{a:2,b:7,back:true}],['PPKKKKKKPP','R2'],['PPKKKKKKPP','R3']]},
   heart:{name:'하트',N:8,lv:1,base:60,moves:['K','P'],items:['하트 목도리','하트 컵받침','하트 손목워머'],
-    chords:[[60,64,67],[57,60,64],[53,57,60],[55,59,62]],
+    chords:[[60,64,67],[57,60,64],[53,57,60],[55,59,62]],sty:'pop',
     rows:[['KKKKKKKK','A'],['KKKKKKKK','A'],['KKKKKKKK','B'],['KKKPPKKK','C'],['KKPPPPKK','D'],['KPPPPPPK','E'],
           ['KPPPPPPK','F'],['KPPKKPPK','D'],['KKKKKKKK','B'],['KPKPKPKP','C'],['PKPKPKPK','C'],['KKKKKKKK','B']]},
   cable:{name:'꽈배기',N:10,lv:2,base:120,moves:['K','P','CF'],items:['꽈배기 모자','꽈배기 목도리','꽈배기 장갑'],
-    chords:[[57,60,64],[53,57,60],[60,64,67],[55,59,62]],
-    rows:[['PPKKKKKKPP','W10'],['PPKKKKKKPP','P1'],['PPKKKKKKPP','P2'],['PPKKKKKKPP','CAB',{a:2,b:7}],['PPKKKKKKPP','P3'],['PPKKKKKKPP','P1'],
-          ['PPKKKKKKPP','P2'],['PPKKKKKKPP','P3'],['PPKKKKKKPP','P1'],['PPKKKKKKPP','CAB',{a:2,b:7}],['PPKKKKKKPP','P2'],['PPKKKKKKPP','P1']]},
+    chords:[[57,60,64,67],[50,53,57,60],[55,59,62,65],[52,55,59,62]],sty:'jazz',
+    rows:[['PPKKKKKKPP','W10'],['PPKKKKKKPP','J1'],['PPKKKKKKPP','J2'],['PPKKKKKKPP','JC',{a:2,b:7}],['PPKKKKKKPP','J3'],['PPKKKKKKPP','J1'],
+          ['PPKKKKKKPP','J2'],['PPKKKKKKPP','J3'],['PPKKKKKKPP','J1'],['PPKKKKKKPP','JC',{a:2,b:7}],['PPKKKKKKPP','J2'],['PPKKKKKKPP','J1']]},
   chevron:{name:'셰브론',N:10,lv:3,base:180,moves:['K','SK','K2','ML','MR'],items:['셰브론 담요','셰브론 쿠션','셰브론 숄'],
-    chords:[[53,57,60],[55,59,62],[52,55,59],[57,60,64]],
-    rows:[[chev,'CH1'],['KKKKKKKKKK','P2'],[chev,'CH1'],['KKKKKKKKKK','P1'],[chev,'CH'],['KKKKKKKKKK','P3'],
-          [chev,'CH'],['KKKKKKKKKK','P2'],[chev,'CH2'],['KKKKKKKKKK','P1'],[chev,'CH2'],['KKKKKKKKKK','P3']]}};
+    chords:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],sty:'chip',
+    rows:[[chev,'CH1'],['KKKKKKKKKK','E10a'],[chev,'E12a'],['KKKKKKKKKK','E10b'],[chev,'CH'],['KKKKKKKKKK','E10c'],
+          [chev,'E12b'],['KKKKKKKKKK','E10a'],[chev,'CH2'],['KKKKKKKKKK','E10b'],[chev,'E12a'],['KKKKKKKKKK','E10c']]}};
+/* each pattern is its own song: groove, bass, lead sound, melody shape, tempo, metre and swing */
+const MAJ=[0,2,4,5,7,9,11,12,14,16],MAJP=[0,2,4,7,9,12,14,16,19,21],DOR=[0,2,3,5,7,9,10,12,14,15],MIN=[0,2,3,5,7,8,10,12,14,15],MINP=[0,3,5,7,10,12,15,17,19,22],BLU=[0,3,5,6,7,10,12,15,17,18];
+const STYLE={
+  pop:{name:'동요 팝',tempo:1,lead:'bell',scale:MAJP,shape:null},
+  march:{name:'행진곡',tempo:1.05,lead:'square',scale:MAJ,shape:[0,2,4,4,2,0,4,7]},
+  bossa:{name:'보사노바',tempo:.95,lead:'soft',scale:DOR,shape:[4,3,2,3,4,5,4,2]},
+  waltz:{name:'왈츠',tempo:1.12,meter:3,lead:'pluck',scale:MAJ,shape:[0,2,4,7,4,2,1,3,5,7]},
+  jazz:{name:'스윙 재즈',tempo:1,swing:[0,.33,.67,.83],lead:'vibe',scale:BLU,shape:[0,1,2,3,4,2,5,4,3,1,0]},
+  reggae:{name:'레게',tempo:.93,lead:'organ',scale:MINP,shape:[0,0,2,0,4,3,2,1]},
+  chip:{name:'칩튠 댄스',tempo:1.08,lead:'pulse',scale:MIN,shape:[0,2,4,7,4,2,7,9,7,4,2,0]}};
+const styleOf=pk=>STYLE[(PAT[pk]||{}).sty]||STYLE.pop;
+let STY=STYLE.pop,METER=4;
 const chartRows=(P,alt)=>P.rows.map(([cells,r,cable],i)=>({cells:typeof cells==='string'?cells.split(''):cells.slice(),cable:cable||null,color:P.stripe&&alt&&Math.floor(i/2)%2?alt:undefined})).reverse();
 const LINES=['선물할 거예요!','요즘 너무 추워서요~','급해요, 부탁해요!','엄마 생신이라서요.','저번 거 너무 좋았어요!','여기 소문 듣고 왔어요.','친구랑 커플로 하려고요.'];
 const YARNS0=[['#ef8aa0','분홍'],['#e6d3a8','크림'],['#8ec5f0','하늘']];
@@ -746,8 +765,8 @@ function iconFor(pk,yarn){const k=pk+yarn;if(iconCache.has(k))return iconCache.g
 const LEAD=2;
 let P=PAT.heart,N=8,ROWS=12,BPM=64,BT=60/BPM,GOOD=.09,PERF=.04,ROW=[],TOTAL=0,YARN=C.pink,order=null;
 function setup(){
-  N=P.N;ROWS=P.rows.length;BT=60/BPM;GOOD=Math.min(.3,Math.min(.2,Math.max(.15,BT/4*.95))*({1:1.5,2:1.3,3:1.12}[P.lv]||1)*(owned('needle')?1.1:1)*(owned('silver')?1.1:1));PERF=Math.min(.1,GOOD*.45);ROW=[];let beat=LEAD;
-  P.rows.forEach(([cells,r,cable],ri)=>{let pat=R16[r];if(order&&order.hard){const c=[...pat].filter(ch=>ch==='x').length,pool=HARD[c];if(pool)pat=pool[ri%pool.length]}const slots=[];[...pat].forEach((ch,k)=>{if(ch==='x')slots.push(k)});
+  STY=STYLE[P.sty]||STYLE.pop;METER=STY.meter||4;N=P.N;ROWS=P.rows.length;BT=60/(BPM*STY.tempo);GOOD=Math.min(.3,Math.min(.2,Math.max(.15,BT/4*.95))*({1:1.5,2:1.3,3:1.12}[P.lv]||1)*(owned('needle')?1.1:1)*(owned('silver')?1.1:1));PERF=Math.min(.1,GOOD*.45);ROW=[];let beat=LEAD;
+  P.rows.forEach(([cells,r,cable],ri)=>{let pat=R16[r];if(order&&order.hard){const c=[...pat].filter(ch=>ch==='x').length,pool=(METER===3?HARD3:HARD)[c];if(pool)pat=pool[ri%pool.length]}const slots=[];[...pat].forEach((ch,k)=>{if(ch==='x')slots.push(k)});
     ROW.push({cells:typeof cells==='string'?cells.split(''):cells.slice(),cable:cable||null,start:beat,len:pat.length/4,slots});beat+=pat.length/4});
   TOTAL=beat}
 const st={phase:'idle',ac:null,master:null,noise:null,start:0,nextBeat:0,row:0,sts:[],notes:[],slip:null,fabric:[],
@@ -757,7 +776,7 @@ function buildRow(r,live){
   const R=ROW[r],sts=[],notes=[],acts=[];let slip=null;
   for(let k=0;k<N;k++){const j=N-1-k;acts.push({j,a:R.cells[j]});if(R.cable&&j===R.cable.b+1)acts.push({slip:true})}
   if(R.cable&&R.cable.b===N-1)acts.unshift({slip:true});
-  let hi=0;const take=()=>{const s=R.slots[hi++];return s===undefined?bt(R.start+R.len):bt(R.start+s/4)};
+  let hi=0;const take=()=>{const s=R.slots[hi++];return s===undefined?bt(R.start+R.len):bt(R.start+slotBeat(s))};
   for(const act of acts){
     if(act.slip){slip={kind:R.cable.back?'CB':'CF',dir:R.cable.back?'R':'L',t:take(),res:null,slip:true};notes.push(slip);continue}
     const M=MOVE[act.a],s={j:act.j,a:act.a,from:act.j,cn:false,moveT:null,res:null,hitAt:0,parts:[]};
@@ -804,23 +823,53 @@ function kick(t,v=.9){const o=st.ac.createOscillator(),g=st.ac.createGain();o.ty
 function noise(t,type,f,p,d,q){const s=st.ac.createBufferSource(),fl=st.ac.createBiquadFilter(),g=st.ac.createGain();s.buffer=st.noise;fl.type=type;fl.frequency.value=f;if(q)fl.Q.value=q;env(g,t,p,d,.002);s.connect(fl).connect(g).connect(st.master);s.start(t);s.stop(t+d+.02)}
 function bell(){if(!st.ac)return;const t=st.ac.currentTime;tone(t,hz(84),'square',.05,.15,.002);tone(t+.09,hz(88),'square',.05,.3,.002)}
 function coinSfx(n){if(!st.ac)return;const t=st.ac.currentTime;for(let i=0;i<Math.min(n,6);i++){tone(t+i*.07,hz(88),'square',.04,.06,.002);tone(t+i*.07+.035,hz(95),'square',.04,.08,.002)}}
-const barOf=b=>Math.floor((b-LEAD)/4);
+const barOf=b=>Math.floor((b-LEAD)/METER);
+/* where a 16th slot falls in beats; a swung song pushes the off-beats late */
+const slotBeat=s=>Math.floor(s/4)+(STY.swing?STY.swing[s%4]:(s%4)/4);
 const chordAtBeat=b=>P.chords[((barOf(b)%4)+4)%4];
 function rowAtBeat(b){for(let i=ROW.length-1;i>=0;i--)if(b>=ROW[i].start)return i;return -1}
 function schedBeat(b,t){
   if(b<LEAD){tone(t,b===LEAD-1?hz(84):hz(79),'square',.06,.06,.002);return}
   if(b>=TOTAL){if(b===TOTAL){kick(t);P.chords[0].forEach((m,i)=>tone(t+i*.08,hz(m+12),'square',.05,1.2,.005))}return}
-  const inBar=(b-LEAD)%4,ch=chordAtBeat(b),R=ROW[rowAtBeat(b)],L=st.level;
+  const inBar=(b-LEAD)%METER,ch=chordAtBeat(b),R=ROW[rowAtBeat(b)],L=st.level;
   const rel=(b-R.start)*4,rest=!R.slots.some(s=>s>=rel&&s<rel+4)&&rel>=R.slots[R.slots.length-1];
   if(b===R.start&&R.cable)noise(t,'highpass',5000,.18,.8);
-  kick(t,inBar===0?.9:.65);if(inBar===2||rest)kick(t+BT/2,.45);
-  noise(t,'bandpass',2200,inBar%2?.3:.06,.08,.9);
-  if(rest){noise(t+BT/2,'bandpass',2200,.26,.07,.9);noise(t+BT*.75,'bandpass',2600,.2,.06,.9)}
-  for(let i=0;i<2;i++)noise(t+i*BT/2,'highpass',8000,.04+L*.015,.025);
-  tone(t,hz(ch[0]-12),'triangle',.22,BT*.9,.005);if(inBar%2)tone(t+BT/2,hz(ch[0]),'triangle',.16,BT*.4,.005);
-  if(L>=1&&inBar===0)ch.forEach(m=>tone(t,hz(m),'square',.018,BT*3.5,.05));
-  if(L>=2&&rest)[0,1,2].forEach(i=>tone(t+i*BT/3,hz(ch[i]+12),'square',.03,.2,.003));
+  (GROOVE[P.sty]||GROOVE.pop)(b,t,inBar,ch,rest,L);
   schedMel(b)}
+const snare=(t,v,f=2200)=>noise(t,'bandpass',f,v,.08,.9),hat=(t,v)=>noise(t,'highpass',8000,v,.025),bass=(t,m,v,d)=>tone(t,hz(m-12),'triangle',v,d,.005);
+const fill=(t,ch)=>[0,1,2].forEach(i=>tone(t+i*BT/3,hz(ch[i]+12),'square',.03,.2,.003));
+const GROOVE={
+  pop(b,t,inBar,ch,rest,L){kick(t,inBar===0?.9:.65);if(inBar===2||rest)kick(t+BT/2,.45);snare(t,inBar%2?.3:.06);
+    if(rest){snare(t+BT/2,.26);snare(t+BT*.75,.2,2600)}for(let i=0;i<2;i++)hat(t+i*BT/2,.04+L*.015);
+    bass(t,ch[0],.22,BT*.9);if(inBar%2)tone(t+BT/2,hz(ch[0]),'triangle',.16,BT*.4,.005);
+    if(L>=1&&inBar===0)ch.forEach(m=>tone(t,hz(m),'square',.018,BT*3.5,.05));if(L>=2&&rest)fill(t,ch)},
+  /* 줄무늬: a marching band. kick on every step, snare on 2 and 4, a drum roll into each bar, oom-pa bass */
+  march(b,t,inBar,ch,rest,L){kick(t,.75);if(inBar%2)snare(t,.32,2000);for(let i=0;i<2;i++)hat(t+i*BT/2,.05+L*.012);
+    if(inBar===3&&L>=1)for(let i=0;i<4;i++)snare(t+i*BT/4,.1+i*.05,2400);
+    bass(t,ch[0],.24,BT*.42);tone(t+BT/2,hz(ch[2]-12),'triangle',.14,BT*.3,.005);
+    if(L>=1&&inBar%2===0)ch.forEach(m=>tone(t,hz(m),'square',.02,BT*.35,.004));if(L>=3)tone(t,hz(ch[1]+24),'sine',.025,BT*.3,.004);if(L>=2&&rest)fill(t,ch)},
+  /* 멍석: bossa nova. a 3-2 clave on the rim, a shaker, root-fifth bass, soft chords on the off-beats */
+  bossa(b,t,inBar,ch,rest,L){const cl=[[0,6,12],[4,8]][((barOf(b)%2)+2)%2];for(const q of cl)if(Math.floor(q/4)===inBar)noise(t+(q%4)*BT/4,'bandpass',3200,.2,.03,5);
+    for(let i=0;i<4;i++)noise(t+i*BT/4,'highpass',7000,i%2?.02:.035,.03);
+    if(inBar%2===0){kick(t,.6);bass(t,ch[0],.22,BT*1.3)}else{kick(t+BT/2,.35);bass(t+BT/2,ch[2],.18,BT*.9)}
+    if(L>=1&&inBar%2)ch.forEach(m=>tone(t+BT/2,hz(m),'triangle',.035,BT*.5,.01));if(L>=2&&inBar===0)tone(t,hz(ch[2]+12),'sine',.04,BT*1.5,.02);if(L>=2&&rest)fill(t,ch)},
+  /* 고양이: a waltz in three. deep note on one, two light chord "pahs" */
+  waltz(b,t,inBar,ch,rest,L){if(inBar===0){kick(t,.6);bass(t,ch[0],.26,BT*.9)}else{ch.forEach(m=>tone(t,hz(m),'square',.016+(L>=1?.008:0),BT*.32,.004));noise(t,'bandpass',2600,.08,.05,1.2)}
+    hat(t,.03+L*.01);if(L>=2)tone(t+BT/2,hz(ch[(inBar+1)%3]+12),'sine',.04,BT*.3,.004);if(L>=3&&inBar===0)tone(t,hz(ch[2]+24),'sine',.03,BT*2,.01);if(L>=2&&rest)fill(t,ch)},
+  /* 꽈배기: swing jazz. ride cymbal "ding, ding-da", brushes and hi-hat on 2 and 4, a walking bass */
+  jazz(b,t,inBar,ch,rest,L){const sw=STY.swing[2];noise(t,'highpass',6000,.07,.18);if(inBar%2)noise(t+BT*sw,'highpass',6000,.05,.1);
+    if(inBar%2){noise(t,'bandpass',1800,.14,.18,.6);hat(t,.06)}if(inBar===0)kick(t,.45);
+    const nx=P.chords[((barOf(b)+1)%4+4)%4][0],walk=[ch[0],ch[2],ch[3]||ch[1],nx-1];bass(t,walk[inBar],.24,BT*.85);
+    if(L>=1&&(inBar===1||inBar===3))ch.forEach(m=>tone(t+BT*sw,hz(m),'sine',.03,BT*.3,.005));if(L>=2&&rest)fill(t,ch)},
+  /* 물결: reggae one-drop. kick and rim together on three, the chord "skank" on every off-beat */
+  reggae(b,t,inBar,ch,rest,L){if(inBar===2){kick(t,.8);noise(t,'bandpass',3000,.22,.06,3)}for(let i=0;i<2;i++)hat(t+i*BT/2,.035+L*.01);
+    ch.forEach(m=>tone(t+BT/2,hz(m+12),'square',.022,BT*.16,.002));
+    if(inBar===0)bass(t,ch[0],.26,BT*.7);else if(inBar===1)bass(t+BT/2,ch[0],.2,BT*.4);else if(inBar===3)bass(t,ch[2],.2,BT*.6);
+    if(L>=1)tone(t+BT*.75,hz(ch[1]),'square',.012,.08,.002);if(L>=2&&rest)fill(t,ch)},
+  /* 셰브론: chiptune dance. four-on-the-floor, open hat on the off-beat, octave bass, fast arpeggios */
+  chip(b,t,inBar,ch,rest,L){kick(t,.85);if(inBar%2)snare(t,.26,2600);noise(t+BT/2,'highpass',7000,.07,.06);
+    tone(t,hz(ch[0]-12),'square',.045,BT*.4,.002);tone(t+BT/2,hz(ch[0]),'square',.035,BT*.35,.002);
+    if(L>=1)for(let i=0;i<4;i++)tone(t+i*BT/4,hz(ch[i%3]+24),'square',.012,BT*.2,.001);if(L>=2&&rest)fill(t,ch)}};
 const SCALE=[60,62,64,67,69,72,74,76,79,81,84,86,88];
 function melFor(n){const b=(n.t-st.start)/BT,ch=chordAtBeat(Math.floor(b+1e-6));let base=SCALE.findIndex(m=>m>=ch[0]+12);if(base<0)base=5;base=Math.min(base,SCALE.length-8);
   const i=st.notes.indexOf(n),k=((i%8)+8)%8;return SCALE[st.row%2===0?base+k:base+7-k]}
@@ -828,13 +877,23 @@ function melFor(n){const b=(n.t-st.start)/BT,ch=chordAtBeat(Math.floor(b+1e-6));
    after a miss it plays softer until the combo comes back; the press itself only adds a light click */
 function schedMel(b){const r=rowAtBeat(b);if(r<0)return;const list=r===st.row&&st.notes.length?st.notes:prevRow(r).notes,t0=bt(b),t1=bt(b+1),v=st.stats.combo>0||st.stats.miss===0?1:.4;
   list.forEach((n,i)=>{if(n.t>=t0-1e-6&&n.t<t1-1e-6)noteTone(n,i,r,Math.max(n.t,st.ac.currentTime),v)})}
-function noteTone(n,i,r,t,v){const ch=chordAtBeat(Math.floor((n.t-st.start)/BT+1e-6));let base=SCALE.findIndex(m=>m>=ch[0]+12);if(base<0)base=5;base=Math.min(base,SCALE.length-8);
-  const k=((i%8)+8)%8,m=SCALE[r%2===0?base+k:base+7-k];
+function pitchFor(n,i,r){const ch=chordAtBeat(Math.floor((n.t-st.start)/BT+1e-6)),sc=STY.scale;let k;
+  if(!STY.shape){k=((i%8)+8)%8;if(r%2)k=7-k}else{const L=STY.shape.length;k=Math.min(STY.shape[((i%L)+L)%L]+(r%2?2:0),sc.length-1)}
+  let m=ch[0]+12+sc[k];while(m<62)m+=12;while(m>90)m-=12;return m}
+function leadTone(t,m,v){const S=STY.lead;
+  if(S==='bell'){tone(t,hz(m),'sine',.13*v,.35,.002);tone(t,hz(m+12),'sine',.035*v,.15,.002)}
+  else if(S==='soft')tone(t,hz(m),'triangle',.2*v,.3,.01);
+  else if(S==='pluck'){tone(t,hz(m),'triangle',.22*v,.13,.002);tone(t,hz(m+12),'square',.02*v,.05,.002)}
+  else if(S==='vibe'){tone(t,hz(m),'sine',.16*v,.45,.003);tone(t,hz(m+12),'sine',.05*v,.25,.003)}
+  else if(S==='organ'){tone(t,hz(m),'square',.045*v,.14,.004);tone(t,hz(m-12),'triangle',.12*v,.14,.004)}
+  else if(S==='pulse'){tone(t,hz(m),'square',.055*v,.07,.001);tone(t+.035,hz(m+12),'square',.028*v,.05,.001)}
+  else tone(t,hz(m),'square',.065*v,.16,.002)}
+function noteTone(n,i,r,t,v){const m=pitchFor(n,i,r);
   if(n.slip){kick(t,.8);[0,4,7,12].forEach((x,j)=>tone(t+j*.03,hz(m+x),'square',.04*v,.15,.002));return}
   if(n.dir==='TL'||n.dir==='TR')tone(t,hz(m),'square',.07*v,.1,.002);
   else if(n.kind==='ML'||n.kind==='MR')tone(t,hz(m+12),'square',.05*v,.08,.002);
   else if(n.dir==='D')tone(t,hz(m),'triangle',.22*v,.18,.002);
-  else tone(t,hz(m),'square',.065*v,.16,.002)}
+  else leadTone(t,m,v)}
 function playHit(n,res){const t=st.ac.currentTime,q=Math.max(t,n.t);noise(t,'bandpass',3600,.09,.02,3);
   if(n.slip)noise(q,'highpass',4000,.22,.4);
   if(res==='perfect')tone(q+.01,hz(96),'square',.014,.05,.002)}
@@ -1032,7 +1091,7 @@ function openOrder(c){
   if(c.story&&!c.storyReady&&storyMeet(c))return;
   initAudio();const Pt=PAT[c.pk];order={c,pk:c.pk,item:c.item,yarn:c.yarn,yarn2:c.yarn2,grad:(owned('grad')||!!c.grad)&&!Pt.stripe};
   $('oTitle').textContent=`${c.item} 주문`;$('oLine').textContent=`“${c.line}”`;
-  $('oPat').textContent=`${Pt.name} · ${Pt.stripe?c.yarnName+'·'+c.yarn2Name+' 줄무늬':order.grad?c.yarnName+'→'+c.yarn2Name+' 그라데이션':c.yarnName+' 실'}`;$('oPay').textContent=`최대 ${payFor(c.pk,1).toLocaleString()}코인 + 팁`;
+  $('oPat').textContent=`${Pt.name} · ${Pt.stripe?c.yarnName+'·'+c.yarn2Name+' 줄무늬':order.grad?c.yarnName+'→'+c.yarn2Name+' 그라데이션':c.yarnName+' 실'} · ♪ ${styleOf(c.pk).name}`;$('oPay').textContent=`최대 ${payFor(c.pk,1).toLocaleString()}코인 + 팁`;
   $('oLv').textContent='★'.repeat(Pt.lv)+'☆'.repeat(3-Pt.lv);
   $('oHow').textContent=Pt.moves.filter(m=>m!=='K'&&m!=='P').length?`쓰는 기법: ${Pt.moves.map(m=>MOVE[m].ab||MOVE[m].name).join(', ')}`:'겉뜨기와 안뜨기만 써요.';
   order.hard=false;const ms=(save.mastery||{})[c.pk]||0,bs=(save.best||{})[c.pk],bh=(save.best||{})[c.pk+':h'];
@@ -1851,7 +1910,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='4f5bf484';
+const BUILD='54dbcc98';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
