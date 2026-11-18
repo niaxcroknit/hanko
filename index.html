@@ -515,10 +515,10 @@ const R16={A:'x...x...x...x...x.x.x.x.........',B:'xxxxxxxx........',C:'x.x.xxxx
   CAB:'xxx.xxxxxx.xx...',W10:'x...x...x...x...x.x.x.x.x.x.....',CH1:'x.x.x.x.x.x.x.x.x.x.x.x.........',CH:'x.xxxxxxxxxx..x.',CH2:'xxx.xxxxxx.xxx..',
   P1:'xxxxx.xxxxx.....',P2:'x.x.x.x.xxxxxx..',P3:'xx.xx.xx.xx.xx..',Q10:'xxxx.xxx.xxx....',
   /* 줄무늬 · 행진곡 */M1:'x.x.x.x.x.x.x.x.',M2:'x...x.x.xxx.x.x.',M3:'xxx.x...xxx.x...',M4:'x.xxx.xxx.x.....',M5:'xxxxx...x.x.x...',
-  /* 멍석 · 보사노바 */S1:'x.xx..x.x.xx..x.',S2:'xx..x.x.xx..x.x.',S3:'x..x..x.x.......x..x..x.x.......',S4:'x.x..x.xx.x..x.x',
+  /* 멍석 · 보사노바 */S1:'x.xx..x.x.xx..x.',S2:'xx..x.x.xx..x.x.',S3:'x..x..x.x.......x..x..x.x.......',S4:'x.x..x.xx.x.x.x.',
   /* 고양이 · 왈츠(3박) */TW:'x.....x.....x.....x.....x.x.x.x.x.x.',T1:'x...x.x.x.x.x...x.x.x.x.',T2:'x.x.x.x...x.x.x.x...x.x.',T3:'xxx.x.....x.xxx.x.....x.',T4:'x.....x.x.x.x.x.x.x.x.x.',
   /* 꽈배기 · 스윙 재즈 */J1:'x.xxx.xxx.xxx...',J2:'xx.xx.xx.xx.xx..',J3:'x.x.x.xxx.x.xxx.',JC:'xxx.x.xxx.xxx.x.',
-  /* 물결 · 레게 */RW:'..x...x...x...x...x.x.x.x.x.x...',R1:'x.x.xx.xx.x.xxx.',R2:'.xx.x.xx.xx.x.xx',R3:'x.xx..xxx.xx..xx',RC:'.xxxx.xxx.xxx.x.',
+  /* 물결 · 레게 */RW:'..x...x...x...x...x.x.x.x.x.x...',R1:'x.x.xx.xx.x.xxx.',R2:'.xx.x.xx.xx.xxx.',R3:'x.xx..xxx.xx.xx.',RC:'.xxxx.xxx.xxx.x.',
   /* 셰브론 · 칩튠 */E12a:'xxxx.xxxx.xxxx..',E12b:'x.xxxxx.xxxxx.x.',E10a:'xx.xx.xx.xx.xx..',E10b:'x.x.xxxx..x.xxx.',E10c:'xxx.x.xxx.x.xx..'};
 const HARD3={10:['x.xxx.x.xxx.x.x.........','xxx.xxx.....xxx.x.......','x.x.xxx.x.x.xxx.........']};
 const HARD={8:['xx.xxxxxx.......','x.xx.xxx.xx.....','xxx.xxx.xx......','xxxxxxxx........'],10:['xxxxxxxxxx......','xx.xxxx.xxxx....','x.xxx.xxx.xxx...'],
@@ -937,20 +937,29 @@ function input(dir,stamp,key,vec){
   else{let nd=9;for(const n of st.notes){if(n.res||n.dir!==dir)continue;const d=n.t-t;if(Math.abs(d)<Math.abs(nd))nd=d}
     if(Math.abs(nd)<.45)pop(nd>0?'빨라요':'늦어요',C.amber);if(st.ac)tone(st.ac.currentTime,hz(96),'square',.015,.03,.002);st.jabT=performance.now()-70}}
 function rowColor(r){if(!order)return undefined;if(P.stripe)return Math.floor(r/2)%2?order.yarn2:undefined;if(order.grad)return mixHex(YARN,order.yarn2,r/(ROWS-1));return undefined}
-const INTRO_MS=1900;
+const INTRO_MS=1900,READY_MS=900;
 function introText(n){if(n.introSpecial)return{golden:'황금 실: 맞히면 보너스 코인!',tangle:'엉킨 실: 판정 원 한가운데서 정확히!',wobble:'고양이가 실을 건드렸어요! 흔들려도 박자는 그대로'}[n.introSpecial];const M=MOVE[n.kind];return`새 기법! ${M.name}: ${M.how}`}
 /* the first time a technique or special note shows up, the music holds so the notice can be read.
    New notes that come close together are explained in one stop (two lines per page, page after page),
    so the music never stops in the middle of a burst and no notice is marked read without being shown */
+/* when to stop for a notice: in the widest gap between notes before it in this row (usually the breath just
+   before the row starts, when it has just been loaded), so the music never freezes and restarts mid-burst */
+function introPauseAt(n,t){const lo=t,hi=n.t-.6*BT,ts=[t,...st.notes.filter(m=>m.t>t&&m.t<n.t).map(m=>m.t).sort((a,b)=>a-b),n.t];
+  let best=null,bl=-1;for(let i=0;i<ts.length-1;i++){const a=ts[i],g=ts[i+1]-a,c=i===0?a:a+Math.min(GOOD*1.2,g/3);if(c<lo-1e-6||c>hi)continue;if(g>=bl-1e-6){bl=g;best=c}}
+  return best!=null?best:Math.max(t,n.t-1.8*BT)}
+/* after any stop the song backs up two beats: the notes ahead slide back, two ticks count you in, then the music
+   carries on from where it stopped. resuming straight into a burst made the next notes impossible to catch */
+function giveLeadIn(k=2){if(!st.ac)return;const d=k*BT,T0=st.ac.currentTime;st.start+=d;for(const n of st.notes)if(!n.res)n.t+=d;for(const s of st.sts)if(s.parts&&s.parts.length)s.t=s.parts[0].t;
+  if(st.endAt)st.endAt+=d;for(let i=0;i<k;i++)tone(T0+.05+i*BT,hz(i===k-1?84:79),'square',.06,.06,.002)}
 function introPause(t){const pend=st.notes.filter(n=>(n.intro||n.introSpecial)&&!n.introDone&&!n.res&&n.t-t>0).sort((a,b)=>a.t-b.t);
-  if(!pend.length||pend[0].t-t>=1.8*BT)return false;
-  const grp=[pend[0]];for(let i=1;i<pend.length;i++){if(pend[i].t-grp[grp.length-1].t<2.8*BT)grp.push(pend[i]);else break}
+  if(!pend.length)return false;if(pend[0].pauseAt==null)pend[0].pauseAt=introPauseAt(pend[0],t);if(t<pend[0].pauseAt)return false;
+  const grp=pend;
   const msgs=[];grp.forEach(n=>{n.introDone=true;const m=introText(n);if(!msgs.includes(m))msgs.push(m)});
   st.introPages=[];for(let i=0;i<msgs.length;i+=2)st.introPages.push(msgs.slice(i,i+2));
-  st.introMsgs=st.introPages[0];st.introT=performance.now();st.phase='intro';try{st.ac.suspend()}catch(e){}return true}
+  st.introMsgs=st.introPages[0];st.introT=performance.now();giveLeadIn();st.phase='intro';try{st.ac.suspend()}catch(e){}return true}
 function updateKnit(t){
   if(st.phase==='intro'&&!document.hidden){const pages=st.introPages||[st.introMsgs],pg=Math.floor((performance.now()-st.introT)/INTRO_MS);
-    if(pg>=pages.length){st.phase='play';st.ac.resume()}else st.introMsgs=pages[pg]}
+    if(performance.now()-st.introT>=pages.length*INTRO_MS+READY_MS){st.phase='play';st.ac.resume()}else if(pg<pages.length)st.introMsgs=pages[pg];else st.introMsgs=[]}
   if(st.phase!=='play')return;
   if(introPause(t))return;
   for(const n of st.notes)if(!n.res&&t>n.t+GOOD)judge(n,'miss');
@@ -1069,7 +1078,8 @@ function drawKnit(t){
     else{const sp=lane.find(n=>n.introSpecial&&n.introDone&&!n.res&&n.t-t<4*BT&&n.t-t>-GOOD);if(sp)softLabel(introText(sp),J,100)}}
   if(st.phase==='intro'){x.fillStyle='rgba(20,10,15,.28)';x.fillRect(-OX,-OY,VW,VH);(st.introMsgs||[]).forEach((m,i)=>softLabel(m,J,84+i*18));
     const el=performance.now()-st.introT,pages=st.introPages||[],k=Math.max(0,1-(el%INTRO_MS)/INTRO_MS);
-    if(pages.length>1)txt(`${Math.min(pages.length,Math.floor(el/INTRO_MS)+1)}/${pages.length}`,J+36,Math.round(80+(st.introMsgs||[]).length*18-1),'#fff3dc','left',11,false);x.fillStyle='rgba(255,243,220,.7)';x.fillRect(Math.round(J-30),Math.round(80+(st.introMsgs||[]).length*18+4),Math.round(60*k),2)}
+    if(el>=pages.length*INTRO_MS){txt('다시 시작!',J,70,'#e3869b','center',24,true,C.ink)}
+    else{if(pages.length>1)txt(`${Math.min(pages.length,Math.floor(el/INTRO_MS)+1)}/${pages.length}`,J+36,Math.round(80+(st.introMsgs||[]).length*18-1),'#fff3dc','left',11,false);x.fillStyle='rgba(255,243,220,.7)';x.fillRect(Math.round(J-30),Math.round(80+(st.introMsgs||[]).length*18+4),Math.round(60*k),2)}}
 }
 
 /* =========================================================
@@ -1322,7 +1332,7 @@ const bestKey=()=>order?order.pk+(order.hard?':h':''):'';
 $('oAccept').addEventListener('click',beginKnit);$('oReject').addEventListener('click',reject);
 $('giveBtn').addEventListener('click',give);$('retryBtn').addEventListener('click',()=>{$('resultP').hidden=true;beginKnit()});
 $('nextDay').addEventListener('click',nextDay);
-function pause(why){if(scene!=='knit'||(st.phase!=='play'&&st.phase!=='intro'))return;st.phase='paused';st.ac.suspend();$('pauseNote').hidden=why!=='blur';$('pauseNote').textContent='게임 화면 밖을 눌러서 멈췄어요. 계속하면 키보드가 다시 인식돼요.';$('pauseP').hidden=false;$('resumeBtn').focus()}
+function pause(why){if(scene!=='knit'||(st.phase!=='play'&&st.phase!=='intro'))return;if(st.phase==='play')giveLeadIn();st.phase='paused';st.ac.suspend();$('pauseNote').hidden=why!=='blur';$('pauseNote').textContent='게임 화면 밖을 눌러서 멈췄어요. 계속하면 키보드가 다시 인식돼요.';$('pauseP').hidden=false;$('resumeBtn').focus()}
 $('pauseBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pause()});$('pauseBtn').addEventListener('click',()=>pause());
 $('resumeBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();st.phase='play';focusStage()});
 $('restartBtn').addEventListener('click',()=>{$('pauseP').hidden=true;st.ac.resume();beginKnit()});
@@ -1910,7 +1920,7 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,codeOf,parseCode,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='54dbcc98';
+const BUILD='e1c80322';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
