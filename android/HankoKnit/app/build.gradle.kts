@@ -11,8 +11,8 @@ android {
         minSdk = 24
         targetSdk = 36
         // 스토어에 새로 올릴 때마다 versionCode를 1씩 올려 주세요.
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
     }
 
     buildTypes {
