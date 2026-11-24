@@ -180,3 +180,5 @@ Claude와의 기획·제작 대화(2026-11-05)를 정리한 문서입니다. 같
 - 11/23 "작업실 주고받기 제거" 커밋이 예전 사본으로 index.html을 덮어써서 11/17~18 작업(이야기·미니게임·장르별 노래·문 연출)이 사이트에서 빠졌던 것을 되돌림: e1551c3의 index.html을 기준으로 다시 올림.
 - 그 위에 작업실 도안 코드 공유(HK1- 코드, '코드로 가져오기' 탭, codeOf/parseCode)만 다시 제거. 작업실은 도안 만들기·내 도안·자유 뜨기.
 - 앞으로는 저장소의 index.html이 유일한 원본. 예전 템플릿(tycoon.tpl.html + buildt.py)은 쓰지 말 것(11/17 이후 변경이 없음).
+
+- 2026-11-24: 안드로이드 앱 프로젝트를 android/HankoKnit에 둠. 패키지 com.niaxcroknit.hankoknit(예전 com.niaxcroknit.hanko는 플레이 콘솔에서 지워서 재사용 불가). 게임은 UA에 HankoApp이 있으면 APP 모드(홈 화면 안내·전체화면 버튼 숨김, 백업 파일 저장은 HankoAndroid.saveText 브리지). 게임 수정 시 index.html을 android/HankoKnit/app/src/main/assets/index.html에도 복사하고 versionCode 올리기.

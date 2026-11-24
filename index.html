@@ -573,6 +573,7 @@ const BOOKS=['stripe','seed','cat','cable','wave','chevron'];
 /* =========================================================
    4. Save data
    ========================================================= */
+const APP=/HankoApp/.test(navigator.userAgent);/* running inside the Android app's WebView */
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const fresh=()=>({coins:0,day:1,owned:{},made:[],served:0,earnedToday:0,offset:0});
 let save=store.get('hanko-tycoon',null)||fresh();
@@ -1305,9 +1306,9 @@ $('titleHelp').addEventListener('click',()=>openHelp('titleP'));$('pauseHelp').a
 
 /* title */
 function refreshTitle(){const has=save.day>1||save.coins>0;$('playBtn').textContent=has?'이어서 영업':'영업 시작';$('newBtn').hidden=!has;
-  $('saveNote').textContent=has?`${save.day}일차 · ${save.coins}코인 · 이 브라우저에 저장돼요`:'진행은 이 브라우저에 저장돼요.';$('saveNote').textContent+=` · 버전 ${BUILD.slice(-4)}`}
+  {const w=APP?'이 기기':'이 브라우저';$('saveNote').textContent=has?`${save.day}일차 · ${save.coins}코인 · ${w}에 저장돼요`:`진행은 ${w}에 저장돼요.`}$('saveNote').textContent+=` · 버전 ${BUILD.slice(-4)}`}
 document.querySelectorAll('#speeds button').forEach(b=>b.addEventListener('click',()=>{BPM=+b.dataset.bpm;document.querySelectorAll('#speeds button').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
-const fsOK=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const fsOK=()=>!APP&&!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
 const isFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function goFS(){if(!fsOK()||isFS())return;const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
   try{const pr=rq.call(el,{navigationUI:'hide'});const lock=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};if(pr&&pr.then)pr.then(lock,()=>{});else lock()}catch(e){}}
@@ -1681,11 +1682,12 @@ function bkCopy(text,ta,msg){const ok=()=>{msg.textContent='복사했어요. 메
   const fall=()=>{ta.focus();ta.select();ta.setSelectionRange(0,text.length);try{document.execCommand('copy')?ok():msg.textContent='코드를 길게 눌러 직접 복사해 주세요.'}catch(e){msg.textContent='코드를 길게 눌러 직접 복사해 주세요.'}};
   try{navigator.clipboard.writeText(text).then(ok,fall)}catch(e){fall()}}
 function bkFile(text,msg){const d=new Date(),n=`hanko-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.txt`;
+  if(window.HankoAndroid){try{HankoAndroid.saveText(n,text);msg.textContent='저장할 곳을 골라 주세요.';return}catch(e){}}
   try{const f=new File([text],n,{type:'text/plain'});if(navigator.canShare&&navigator.canShare({files:[f]})&&/iP(hone|ad|od)|Android/.test(navigator.userAgent)){navigator.share({files:[f]}).then(()=>msg.textContent='백업 파일을 보냈어요.',()=>{});return}}catch(e){}
   try{const u=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=u;a.download=n;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);msg.textContent=`'${n}' 파일로 저장했어요.`}
   catch(e){msg.textContent='파일 저장이 막혀 있어요. 위 코드를 복사해 두세요.'}}
 function openBackup(){openX('백업 · 불러오기',null,b=>{persist();const code=bkEncode(save);
-  b.insertAdjacentHTML('beforeend',`<p class="sub">기록은 이 기기 브라우저에만 저장돼요. 기기를 바꾸거나 방문 기록을 지우기 전에 백업해 두세요.</p><h3>백업하기 <span class="sub">지금: ${esc(bkInfo(save))}</span></h3>`);
+  b.insertAdjacentHTML('beforeend',`<p class="sub">${APP?'기록은 이 폰 안에만 저장돼요. 앱을 지우거나 폰을 바꾸기 전에 백업해 두세요.':'기록은 이 기기 브라우저에만 저장돼요. 기기를 바꾸거나 방문 기록을 지우기 전에 백업해 두세요.'}</p><h3>백업하기 <span class="sub">지금: ${esc(bkInfo(save))}</span></h3>`);
   const ta=document.createElement('textarea');ta.className='bk';ta.readOnly=true;ta.rows=2;ta.value=code;ta.setAttribute('aria-label','백업 코드');ta.addEventListener('focus',()=>ta.select());
   const m1=document.createElement('p');m1.className='sub';m1.setAttribute('aria-live','polite');
   const r1=document.createElement('div');r1.className='row';let inFrame=true;try{inFrame=window.top!==window}catch(e){}r1.append(mkBtn('코드 복사','main',()=>bkCopy(code,ta,m1)));if(!inFrame)r1.append(mkBtn('파일로 저장',null,()=>bkFile(code,m1)));b.append(ta,r1,m1);
@@ -1911,11 +1913,11 @@ function lifeHud(){const un=(save.letters||[]).filter(m=>!m.read).length,t=un?`�
 
 if(globalThis.__HANKO_TEST__)globalThis.__hanko={SHOPCFG,custCache,craft:{doCraft,addScraps,scrapTotal},pad:()=>PAD(),life:{dayCtx,lifeStartDay,openGoals,openMail,openDye,openStudio,startImprov,createCustom,lifeTap,openAdopt,lifeEndDay,ens},get lastResult(){return lastResult},get deco(){return deco},placeOf,pill,pnow,st,get scene(){return scene},shop,get order(){return order},input:d=>input(d,performance.now()),now,openOrder,frontCustomer,get save(){return save},set save(v){save=v}};
 /* GitHub Pages: if the phone shows a cached older copy, fetch the newest one and reload once */
-const BUILD='6b04d1e3';
+const BUILD='6b04d465';
 if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)){try{fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([0-9a-z]+)'/);
   if(m&&m[1]!==BUILD&&!sessionStorage.getItem('hk-reload-'+m[1])){sessionStorage.setItem('hk-reload-'+m[1],'1');location.replace(location.pathname+'?v='+m[1])}}).catch(()=>{})}catch(e){}}
 /* in a browser tab (not a home-screen app, no fullscreen): suggest the home-screen app, and keep stray swipes from moving the page */
-{const standalone=matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone;
+{const standalone=APP||matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone;
   const ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   if(!standalone&&TOUCH&&/^https?:$/.test(location.protocol)){const t=$('homeTip');t.hidden=false;
     t.textContent=ios?'주소창 없이 하려면: 공유 버튼 → \'홈 화면에 추가\' 후 그 아이콘으로 열어요.':'주소창 없이 하려면: 브라우저 메뉴 → \'홈 화면에 추가\'(앱 설치) 후 그 아이콘으로 열어요.'}}
