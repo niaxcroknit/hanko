@@ -172,8 +172,19 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Back: press twice within 2 seconds to close, so a stray back press never ends a game. */
+    /** Back: the game handles it first (pause / close window); otherwise press twice within 2 seconds to close. */
     private void handleBack() {
+        // ask the game first: it pauses a running song or closes an open window
+        if (web != null) {
+            web.evaluateJavascript("window.hankoBack&&window.hankoBack()", v -> {
+                if (!"true".equals(v)) exitOnSecondBack();
+            });
+        } else {
+            exitOnSecondBack();
+        }
+    }
+
+    private void exitOnSecondBack() {
         long now = SystemClock.elapsedRealtime();
         if (now - lastBackAt < 2000) {
             finish();

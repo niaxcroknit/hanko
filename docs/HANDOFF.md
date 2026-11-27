@@ -182,3 +182,13 @@ Claude와의 기획·제작 대화(2026-11-05)를 정리한 문서입니다. 같
 - 앞으로는 저장소의 index.html이 유일한 원본. 예전 템플릿(tycoon.tpl.html + buildt.py)은 쓰지 말 것(11/17 이후 변경이 없음).
 
 - 2026-11-24: 안드로이드 앱 프로젝트를 android/HankoKnit에 둠. 패키지 com.niaxcroknit.hankoknit(예전 com.niaxcroknit.hanko는 플레이 콘솔에서 지워서 재사용 불가). 게임은 UA에 HankoApp이 있으면 APP 모드(홈 화면 안내·전체화면 버튼 숨김, 백업 파일 저장은 HankoAndroid.saveText 브리지). 게임 수정 시 index.html을 android/HankoKnit/app/src/main/assets/index.html에도 복사하고 versionCode 올리기.
+
+
+## 2026-11-27 업데이트 (안드로이드 1.0.1 / versionCode 2)
+- 시작 렉: 가게의 변하지 않는 배경(벽지·전구 줄·징두리·바닥), 커튼, 실 선반을 오프스크린 캔버스에 한 번만 그려 재사용(shopBg/curtainSpr/shelfSpr). 노이즈 버퍼는 noiseBuf()로 지연 생성.
+- 기법 이름: MOVE.name을 한글(왼쪽/오른쪽 꽈배기, 오른코/왼코 겹치기, 왼쪽/오른쪽 늘리기), ab는 약어, lab은 레인 위 짧은 이름.
+- 의견 보내기: 설정 버튼, FEEDBACK_TO(메일 또는 https 폼). 메일 제목·본문에 버전/기기 자동.
+- 뒤로 가기: window.hankoBack()이 뜨는 중이면 멈춤, 창이 열려 있으면 닫기. 안드로이드 MainActivity가 먼저 호출하고 false면 두 번 눌러 종료.
+- 겨울 이벤트: winterOn() = 12월(또는 주소에 ?winter). 겨울 전구색, 솔가지 가랜드, 코바늘 눈꽃 4개, 창틀 눈, 문 앞 매트(drawWinterStatic/drawWinterWindow), 목도리 손님과 겨울 대사, 12월 첫 영업일 우체국 편지(save.winterY).
+- 노르딕 배색 도안책(id nordic, 240코인): 새 기법 N(배색 겉뜨기, → 입력, 색=KCOL=order.yarn2). 배색실은 바탕이 밝으면 잉크 네이비, 어두우면 눈꽃 화이트. 스타일 folk(북유럽 포크), 리듬 NA~ND. 작품에 yarn2 저장, 액자·미니 견본에서 N 칸은 배색색.
+- 글꼴 서브셋 재생성(새 글자 포함).
